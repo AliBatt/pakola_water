@@ -21,6 +21,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the complete production arc
 | [Folder Structure](docs/folder-structure.md) | Complete monorepo layout |
 | [Firestore Schema](docs/firestore-schema.md) | Collections, fields, indexes, security rules |
 | [Diagrams](docs/diagrams.md) | Auth, data flow, notifications, dependency graphs |
+| [**Project Status**](docs/PROJECT_STATUS.md) | **Current progress, next steps, change log** |
 
 ## Tech Stack
 
@@ -31,3 +32,5 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the complete production arc
 ## Status
 
 Architecture design phase — implementation not yet started.
+
+See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for current progress and next steps.
