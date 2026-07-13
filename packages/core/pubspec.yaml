@@ -1,0 +1,14 @@
+name: core
+description: Core types, errors, constants, and logging for Pakola Waters.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  utilities:
+    path: ../utilities
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

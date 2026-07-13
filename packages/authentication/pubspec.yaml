@@ -1,0 +1,30 @@
+name: authentication
+description: Authentication state, providers, and screens for Pakola Waters.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  core:
+    path: ../core
+  design_system:
+    path: ../design_system
+  flutter:
+    sdk: flutter
+  go_router: ^16.0.0
+  models:
+    path: ../models
+  provider: ^6.1.5
+  repositories:
+    path: ../repositories
+  shared_widgets:
+    path: ../shared_widgets
+  utilities:
+    path: ../utilities
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

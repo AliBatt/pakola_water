@@ -10,10 +10,11 @@
 
 | Item | Status |
 |------|--------|
-| **Phase** | Architecture & design |
-| **Implementation** | Not started |
-| **Active branch** | `cursor/water-delivery-architecture-97fc` |
-| **Open PR** | [#1 — Production Architecture Design](https://github.com/AliBatt/pakola_water/pull/1) |
+| **Phase** | Monorepo scaffolding (Phase 1) |
+| **Implementation** | Basic app shells + shared packages |
+| **Active branch** | `cursor/monorepo-scaffold-97fc` |
+| **State management** | Provider |
+| **Routing** | GoRouter |
 
 ---
 
@@ -22,166 +23,116 @@
 ### What exists today
 
 ```
-water_delivery/
-├── README.md                    ✅ Project overview
-├── melos.yaml                   ✅ Monorepo config (no packages yet)
-├── analysis_options.yaml        ✅ Shared lint rules
-└── docs/
-    ├── ARCHITECTURE.md          ✅ Full system architecture
-    ├── folder-structure.md      ✅ Monorepo + package layout
-    ├── firestore-schema.md      ✅ Collections, indexes, security rules
-    ├── diagrams.md              ✅ Auth, data flow, notification diagrams
-    └── PROJECT_STATUS.md        ✅ This file
+pakola_water/
+├── apps/
+│   ├── customer_app/        ✅ Flutter mobile shell (Provider + GoRouter)
+│   ├── driver_app/          ✅ Flutter mobile shell
+│   ├── supervisor_app/      ✅ Flutter mobile shell
+│   └── admin_web/           ✅ Flutter web shell
+├── packages/
+│   ├── core/                ✅ Result, failures, logging, environment
+│   ├── design_system/       ✅ Material 3 theme
+│   ├── firebase/            ✅ Auth/Firestore service wrappers (stub bootstrap)
+│   ├── authentication/      ✅ AuthProvider, LoginScreen, auth routes
+│   ├── models/              ✅ AppUser, enums (AppRole, OrderStatus, UserStatus)
+│   ├── repositories/        ✅ Auth + User repository interfaces/impls
+│   ├── services/            ✅ Auth + User services
+│   ├── shared_widgets/      ✅ Loading, Error, Empty state widgets
+│   └── utilities/           ✅ Validators, formatters, extensions
+├── pakola_waters/           ⚠️ Initial Flutter template (can be removed)
+├── docs/                    ✅ Architecture documentation
+├── melos.yaml               ✅ Monorepo workspace config
+├── pubspec.yaml             ✅ Workspace root (Melos)
+└── README.md                ✅ Updated
 ```
+
+### Each app includes
+
+- `lib/main.dart` — bootstrap with Firebase init + Provider wiring
+- `lib/app.dart` — `MaterialApp.router` with shared theme
+- `lib/config/app_config.dart` — app name, required role, environment
+- `lib/di/app_providers.dart` — dependency injection (Provider)
+- `lib/routing/app_router.dart` — GoRouter with auth/role guards
+- `lib/features/home/home_screen.dart` — placeholder dashboard
 
 ### What does NOT exist yet
 
 | Area | Status |
 |------|--------|
-| `apps/` (4 Flutter apps) | ❌ Not scaffolded |
-| `packages/` (shared packages) | ❌ Not scaffolded |
+| Firebase project configuration | ❌ Need `flutterfire configure` |
 | `functions/` (Cloud Functions) | ❌ Not scaffolded |
 | `firebase/` (rules, indexes, hosting) | ❌ Not scaffolded |
-| Firebase projects (dev/staging/prod) | ❌ Not configured |
+| Feature modules (orders, inventory, etc.) | ❌ Not started |
+| Real authentication flow (Firebase connected) | ❌ Stub only |
 | CI/CD pipelines | ❌ Not configured |
-| Tests | ❌ None |
+| Integration tests | ❌ Placeholder unit tests only |
 
 ---
 
 ## Completed Work
 
-### 2026-07-13 — Architecture design (PR #1)
+### 2026-07-13 — Architecture design (PR #1, merged)
 
-- [x] Monorepo strategy defined (Melos, `apps/` + `packages/`)
-- [x] Clean Architecture layers documented (domain → data → firebase → presentation)
-- [x] Firestore schema designed (15 collections + archive)
-- [x] Data-driven RBAC with roles, permissions, and custom claims
-- [x] Cloud Functions v2 folder structure and function catalog
-- [x] Push notification architecture (server-driven via Functions)
-- [x] GoRouter routing strategy with auth/role/permission guards
-- [x] Riverpod recommended for DI + state management
-- [x] Centralized error handling and logging design
-- [x] Multi-environment strategy (dev / staging / prod)
-- [x] Firestore security rules outline
-- [x] Admin web feature module breakdown
-- [x] Scalability strategy (→ 10k users, 50 branches, 10k+ orders/day)
-- [x] Recommended packages, naming conventions, best practices
-- [x] Project status tracking document (this file)
+- [x] Full architecture documentation in `docs/`
+- [x] Firestore schema, security rules outline, diagrams
+- [x] Project status tracking document
+
+### 2026-07-13 — Monorepo scaffolding (Phase 1)
+
+- [x] Created 4 Flutter apps under `apps/`
+- [x] Created 9 shared packages under `packages/`
+- [x] Provider-based DI (`AppProviders`, `AuthProvider`)
+- [x] GoRouter with auth redirect + role guard per app
+- [x] Shared login screen in `authentication` package
+- [x] Layered architecture: apps → repositories → services → firebase
+- [x] Melos bootstrap verified (`melos bootstrap`, `melos run analyze` pass)
+- [x] Root workspace `pubspec.yaml` for Melos
 
 ---
 
 ## Architecture Decisions (Locked)
 
-These decisions are documented and should not change without an ADR:
-
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Repository layout | Melos monorepo | Code sharing across 4 apps, atomic changes |
-| Architecture pattern | Clean Architecture | Testable, scalable, separation of concerns |
-| State management | Riverpod | Compile-safe DI, async patterns, test overrides |
-| Routing | GoRouter | Declarative, deep links, route guards |
-| Authorization | Data-driven RBAC in Firestore | No hardcoded permissions, admin-manageable roles |
-| Complex writes | Cloud Functions callables | Server validation, inventory, notifications |
-| Offline | None | Firestore is source of truth, always-online |
-| Environments | 3 Firebase projects | dev, staging, prod isolation |
+| Repository layout | Melos monorepo | Code sharing across 4 apps |
+| Architecture pattern | Layered Clean Architecture | UI → Repositories → Services → Firebase |
+| State management | **Provider** | Team preference, ChangeNotifier pattern |
+| Routing | GoRouter | Auth redirects, role-based routing |
+| Authorization | Role per app via `AppConfig.requiredRole` | Customer/Driver/Supervisor/Admin separation |
+| Offline | None | Firestore is source of truth |
 
 ---
 
 ## Next Steps
 
-Work through these in order. Each phase should end with an update to this document.
+### Immediate (Phase 1 completion)
 
-### Phase 1 — Repository scaffolding
-
-- [ ] Install Melos and bootstrap workspace
-- [ ] Create `packages/core` with errors, logging, result types
-- [ ] Create `packages/domain` with base entities and enums
-- [ ] Create `packages/firebase` with service interfaces
-- [ ] Create `packages/data` with repository skeletons
-- [ ] Create `packages/auth`, `packages/routing`, `packages/ui_kit`, `packages/notifications`
-- [ ] Scaffold `apps/customer_app` (empty shell)
-- [ ] Scaffold `apps/driver_app` (empty shell)
-- [ ] Scaffold `apps/supervisor_app` (empty shell)
-- [ ] Scaffold `apps/admin_web` (empty shell)
-- [ ] Verify `melos bootstrap`, `melos analyze` pass
+- [ ] Run `flutterfire configure` for each app (dev environment)
+- [ ] Wire `FirebaseBootstrap.initialize()` with generated options
+- [ ] Remove or archive `pakola_waters/` template folder
+- [ ] Add `analysis_options.yaml` inheritance to all packages
 
 ### Phase 2 — Firebase setup
 
-- [ ] Create Firebase projects: `water-delivery-dev`, `water-delivery-staging`, `water-delivery-prod`
-- [ ] Run `flutterfire configure` for each app × each environment
-- [ ] Add `firebase/` directory with `firebase.json`, `.firebaserc`
-- [ ] Deploy initial Firestore security rules (deny-all baseline)
-- [ ] Deploy Firestore composite indexes
-- [ ] Enable Firebase App Check
-- [ ] Set up Firebase emulators for local development
+- [ ] Create Firebase projects (dev / staging / prod)
+- [ ] Add `firebase/` directory with rules, indexes, hosting
+- [ ] Deploy deny-all baseline security rules
+- [ ] Set up Firebase emulators
 
-### Phase 3 — Authentication & RBAC
+### Phase 3 — Authentication (working E2E)
 
-- [ ] Implement `AuthService` and `UserSessionService`
-- [ ] Implement login / logout / password reset screens
-- [ ] Create Cloud Function: `onUserCreate` (create `users/{uid}` doc)
-- [ ] Create Cloud Function: `setCustomClaims` (role + branch + permissions on token)
-- [ ] Seed system roles: `customer`, `driver`, `supervisor`, `admin`
-- [ ] Seed permissions registry
-- [ ] Implement `PermissionService` and route guards
-- [ ] Wire GoRouter redirect logic per app
-- [ ] Test auth flow end-to-end on dev environment
+- [ ] Seed `roles` and `users` collections
+- [ ] Cloud Function: `onUserCreate`, `setCustomClaims`
+- [ ] Test login → profile fetch → role redirect per app
+- [ ] Add forgot-password screen
 
-### Phase 4 — Core domain & Cloud Functions
+### Phase 4 — First feature (Orders)
 
-- [ ] Implement order entity, enums, repository interface, use cases
-- [ ] Implement `createOrder` Cloud Function (transaction: order + inventory + audit)
-- [ ] Implement `assignDriver` Cloud Function
-- [ ] Implement `updateOrderStatus` Cloud Function
-- [ ] Implement `updateInventory` Cloud Function
-- [ ] Implement `sendPushNotification` + `registerFcmToken`
-- [ ] Implement `onOrderWrite` trigger (denormalization)
-- [ ] Deploy functions to dev
-
-### Phase 5 — Customer app (MVP)
-
-- [ ] Product catalog screen
-- [ ] Create order flow
-- [ ] Order history + detail
-- [ ] Order status tracking (real-time)
-- [ ] Push notification handling + deep links
-- [ ] Profile management
-
-### Phase 6 — Supervisor app (MVP)
-
-- [ ] Branch order dashboard (real-time stream)
-- [ ] Assign driver flow
-- [ ] Inventory view
-- [ ] Low-stock alerts
-- [ ] Notification inbox
-
-### Phase 7 — Driver app (MVP)
-
-- [ ] Assigned deliveries list
-- [ ] Order detail + navigation to address
-- [ ] Status update flow (out for delivery → delivered)
-- [ ] Push notification handling
-
-### Phase 8 — Admin web (MVP)
-
-- [ ] Dashboard with KPIs
-- [ ] Branch management CRUD
-- [ ] Orders management (cross-branch)
-- [ ] Customer / driver management
-- [ ] Product catalog management
-- [ ] Inventory adjustments
-- [ ] Role management UI
-- [ ] Settings
-- [ ] Deploy to Firebase Hosting (staging)
-
-### Phase 9 — Hardening & launch prep
-
-- [ ] Firestore security rules — full implementation + tests
-- [ ] Crashlytics + Analytics integration
-- [ ] Scheduled functions: daily reports, archive, token cleanup
-- [ ] CI/CD: analyze, test, build per app on PR
-- [ ] Staging UAT
-- [ ] Production deployment
+- [ ] Add order models to `packages/models`
+- [ ] Order repository + service
+- [ ] Customer: create order screen
+- [ ] Supervisor: order list + assign driver
+- [ ] Driver: assigned orders list
 
 ---
 
@@ -189,10 +140,10 @@ Work through these in order. Each phase should end with an update to this docume
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| 0 — Architecture design | ✅ Complete | PR #1 |
-| 1 — Repository scaffolding | ⬜ Not started | |
+| 0 — Architecture design | ✅ Complete | Merged PR #1 |
+| 1 — Repository scaffolding | 🔄 In progress | Apps + packages created |
 | 2 — Firebase setup | ⬜ Not started | |
-| 3 — Authentication & RBAC | ⬜ Not started | |
+| 3 — Authentication & RBAC | ⬜ Not started | Stub auth exists |
 | 4 — Core domain & Functions | ⬜ Not started | |
 | 5 — Customer app MVP | ⬜ Not started | |
 | 6 — Supervisor app MVP | ⬜ Not started | |
@@ -204,15 +155,18 @@ Work through these in order. Each phase should end with an update to this docume
 
 ---
 
-## Blockers & Open Questions
+## How to Run
 
-| # | Item | Status | Notes |
-|---|------|--------|-------|
-| 1 | Firebase project naming | Open | Confirm: `water-delivery-dev` etc. or use `pakola_water` prefix? |
-| 2 | Payment gateway | Open | Cash-only for MVP, or integrate Stripe from start? |
-| 3 | Currency / locale | Open | Default currency (PHP?) and primary timezone |
-| 4 | Product images | Open | Needed for MVP? Determines Firebase Storage scope |
-| 5 | Google Maps | Open | Driver navigation — Maps SDK or external link? |
+```bash
+dart pub global activate melos
+melos bootstrap
+
+# Customer app
+cd apps/customer_app && flutter run
+
+# Admin web
+cd apps/admin_web && flutter run -d chrome
+```
 
 ---
 
@@ -222,15 +176,4 @@ Work through these in order. Each phase should end with an update to this docume
 |------|--------|------------|
 | 2026-07-13 | Initial architecture design completed (PR #1) | Cloud Agent |
 | 2026-07-13 | Created project status tracking document | Cloud Agent |
-
----
-
-## How to Use This Document
-
-1. **After every PR or meaningful commit**, update the relevant sections:
-   - Move items from "Next Steps" to "Completed Work"
-   - Update the progress tracker table
-   - Add an entry to the change log
-   - Update "Last updated" date at the top
-2. **When a decision changes**, add an ADR in `docs/adr/` and reference it here
-3. **When a blocker is resolved**, move it to completed or remove it
+| 2026-07-13 | Scaffolded monorepo: 4 apps + 9 packages with Provider/GoRouter | Cloud Agent |

@@ -1,0 +1,12 @@
+# melos_managed_dependency_overrides: core,firebase,models,services,utilities
+dependency_overrides:
+  core:
+    path: ../core
+  firebase:
+    path: ../firebase
+  models:
+    path: ../models
+  services:
+    path: ../services
+  utilities:
+    path: ../utilities

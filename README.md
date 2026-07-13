@@ -1,36 +1,50 @@
-# Water Delivery Management System
+# Pakola Waters — Monorepo
 
-Multi-app Flutter + Firebase monorepo for water delivery operations.
+Water Delivery Management System built with Flutter + Firebase.
 
-## Applications
+## Structure
 
-| App | Platform | Users |
-|-----|----------|-------|
-| `customer_app` | iOS / Android | Customers placing orders |
-| `driver_app` | iOS / Android | Delivery drivers |
-| `supervisor_app` | iOS / Android | Branch supervisors |
-| `admin_web` | Web (Firebase Hosting) | Global administrators |
+```
+apps/
+  customer_app/      # Customer mobile app
+  driver_app/        # Driver mobile app
+  supervisor_app/    # Supervisor mobile app
+  admin_web/         # Admin web app
+
+packages/
+  core/              # Errors, result types, logging, environment
+  design_system/     # Material 3 theme
+  firebase/          # Firebase SDK wrappers
+  authentication/    # Auth provider, login screen, routes
+  models/            # Shared data models
+  repositories/      # Repository layer
+  services/          # Service layer
+  shared_widgets/    # Reusable UI widgets
+  utilities/         # Validators, formatters, extensions
+```
+
+## Getting Started
+
+```bash
+# Install Melos
+dart pub global activate melos
+
+# Bootstrap all packages
+melos bootstrap
+
+# Run an app
+cd apps/customer_app && flutter run
+cd apps/admin_web && flutter run -d chrome
+```
 
 ## Architecture
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the complete production architecture design.
+- **State management:** Provider (`ChangeNotifier`)
+- **Routing:** GoRouter with auth redirects
+- **Layers:** Presentation → Repositories → Services → Firebase
 
-| Document | Description |
-|----------|-------------|
-| [Architecture Overview](docs/ARCHITECTURE.md) | Clean Architecture, RBAC, state management, security |
-| [Folder Structure](docs/folder-structure.md) | Complete monorepo layout |
-| [Firestore Schema](docs/firestore-schema.md) | Collections, fields, indexes, security rules |
-| [Diagrams](docs/diagrams.md) | Auth, data flow, notifications, dependency graphs |
-| [**Project Status**](docs/PROJECT_STATUS.md) | **Current progress, next steps, change log** |
+See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) and [docs/PROJECT_STATUS.md](../docs/PROJECT_STATUS.md).
 
-## Tech Stack
+## Note
 
-- **Flutter** (latest stable) · Material 3 · Riverpod · GoRouter
-- **Firebase** Auth · Firestore · Cloud Functions v2 · FCM · Hosting
-- **Monorepo** managed with Melos
-
-## Status
-
-Architecture design phase — implementation not yet started.
-
-See [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for current progress and next steps.
+The `pakola_waters/` folder at repo root is the initial Flutter template and can be removed once all apps are verified.
