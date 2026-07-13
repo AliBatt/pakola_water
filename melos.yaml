@@ -1,0 +1,27 @@
+name: water_delivery
+repository: https://github.com/example/water_delivery
+
+packages:
+  - apps/**
+  - packages/**
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+
+scripts:
+  analyze:
+    run: melos exec -- dart analyze .
+    description: Run Dart analyzer in all packages
+
+  test:
+    run: melos exec --fail-fast -- dart test
+    description: Run tests in all packages
+
+  codegen:
+    run: melos exec --depends-on="build_runner" -- dart run build_runner build --delete-conflicting-outputs
+    description: Run build_runner code generation
+
+  format:
+    run: melos exec -- dart format .
+    description: Format all packages
