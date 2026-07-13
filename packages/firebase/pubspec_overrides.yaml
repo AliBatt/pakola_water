@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: core,utilities
+dependency_overrides:
+  core:
+    path: ../core
+  utilities:
+    path: ../utilities

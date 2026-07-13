@@ -1,0 +1,21 @@
+name: firebase
+description: Firebase SDK wrappers and configuration for Pakola Waters.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  core:
+    path: ../core
+  firebase_auth: ^5.6.0
+  firebase_core: ^3.14.0
+  cloud_firestore: ^5.6.9
+  cloud_functions: ^5.5.2
+  firebase_messaging: ^15.2.7
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

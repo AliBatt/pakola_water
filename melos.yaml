@@ -1,5 +1,5 @@
 name: water_delivery
-repository: https://github.com/example/water_delivery
+repository: https://github.com/AliBatt/pakola_water
 
 packages:
   - apps/**
