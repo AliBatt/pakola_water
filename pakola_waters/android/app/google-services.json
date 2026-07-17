@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "534707491606",
+    "project_id": "pakoola-waters",
+    "storage_bucket": "pakoola-waters.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:534707491606:android:e2c7ca557ea57dd398f637",
+        "android_client_info": {
+          "package_name": "com.example.pakola_waters"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "534707491606-7aisu8u54aael9c77utdnadufhp2qq8q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDen09nIAItLjxfxTL4FtJU1nAtMyV-GC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "534707491606-7aisu8u54aael9c77utdnadufhp2qq8q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

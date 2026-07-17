@@ -1,0 +1,70 @@
+{
+  "@@locale": "en",
+  "appTitle": "Pakola Waters",
+  "@appTitle": {
+    "description": "Root product name"
+  },
+  "customerAppTitle": "Pakola Waters — Customer",
+  "driverAppTitle": "Pakola Waters — Driver",
+  "supervisorAppTitle": "Pakola Waters — Supervisor",
+  "adminAppTitle": "Pakola Waters — Admin",
+  "loading": "Loading...",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "save": "Save",
+  "confirm": "Confirm",
+  "close": "Close",
+  "ok": "OK",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "successGeneric": "Done successfully.",
+  "networkError": "No internet connection.",
+  "login": "Sign in",
+  "logout": "Sign out",
+  "email": "Email",
+  "password": "Password",
+  "forgotPassword": "Forgot password?",
+  "comingSoon": "Coming soon",
+  "emailRequired": "Email is required",
+  "emailInvalid": "Enter a valid email",
+  "passwordRequired": "Password is required",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "welcomeUser": "Welcome, {name}",
+  "@welcomeUser": {
+    "description": "Greeting with display name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "roleLabel": "Role: {role}",
+  "@roleLabel": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "statusLabel": "Status: {status}",
+  "@statusLabel": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "customerHomeTitle": "Customer Dashboard",
+  "customerHomeSubtitle": "Place and track your water delivery orders.",
+  "driverHomeTitle": "Driver Dashboard",
+  "driverHomeSubtitle": "View and complete assigned deliveries.",
+  "supervisorHomeTitle": "Supervisor Dashboard",
+  "supervisorHomeSubtitle": "Manage branch orders, drivers, and inventory.",
+  "adminHomeTitle": "Admin Dashboard",
+  "adminHomeSubtitle": "Manage branches, users, products, and reports.",
+  "emptyStateDefault": "Nothing here yet.",
+  "languageEnglish": "English",
+  "languageUrdu": "Urdu",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark"
+}

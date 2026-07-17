@@ -1,0 +1,6 @@
+# packages/l10n
+.dart_tool/
+.packages
+pubspec.lock
+.build/
+**/doc/api/

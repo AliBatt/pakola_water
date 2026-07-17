@@ -1,0 +1,51 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Customer App",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "pakola_waters",
+      "program": "lib/app/customer_app/main.dart"
+    },
+    {
+      "name": "Driver App",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "pakola_waters",
+      "program": "lib/app/driver_app/main.dart"
+    },
+    {
+      "name": "Supervisor App",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "pakola_waters",
+      "program": "lib/app/supervisor_app/main.dart"
+    },
+    {
+      "name": "Admin Web",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "pakola_waters",
+      "program": "lib/app/admin_web/main.dart",
+      "deviceId": "chrome",
+      "args": ["-d", "chrome"]
+    },
+    {
+      "name": "Customer App (profile)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "pakola_waters",
+      "program": "lib/app/customer_app/main.dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Customer App (release)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "pakola_waters",
+      "program": "lib/app/customer_app/main.dart",
+      "flutterMode": "release"
+    }
+  ]
+}

@@ -7,8 +7,8 @@ Monorepo layout for the Water Delivery Management System.
 ## Root
 
 ```
-water_delivery/
-├── apps/
+pakola_water/
+├── pakola_waters/          # Single Flutter project (all 4 apps)
 ├── packages/
 ├── functions/
 ├── firebase/
@@ -26,84 +26,42 @@ water_delivery/
 
 ---
 
-## Apps
+## Apps (single Flutter project)
 
-### Customer App
+All four apps live in one Flutter project with separate entrypoints:
 
 ```
-apps/customer_app/
+pakola_waters/
 ├── android/
 ├── ios/
-├── lib/
-│   ├── main.dart
-│   ├── main_dev.dart
-│   ├── main_staging.dart
-│   ├── main_prod.dart
-│   ├── app.dart
-│   └── config/
-│       └── app_config.dart
-├── test/
-├── pubspec.yaml
-└── README.md
-```
-
-### Driver App
-
-```
-apps/driver_app/
-├── android/
-├── ios/
-├── lib/
-│   ├── main.dart
-│   ├── main_dev.dart
-│   ├── main_staging.dart
-│   ├── main_prod.dart
-│   ├── app.dart
-│   └── config/
-│       └── app_config.dart
-├── test/
-├── pubspec.yaml
-└── README.md
-```
-
-### Supervisor App
-
-```
-apps/supervisor_app/
-├── android/
-├── ios/
-├── lib/
-│   ├── main.dart
-│   ├── main_dev.dart
-│   ├── main_staging.dart
-│   ├── main_prod.dart
-│   ├── app.dart
-│   └── config/
-│       └── app_config.dart
-├── test/
-├── pubspec.yaml
-└── README.md
-```
-
-### Admin Web
-
-```
-apps/admin_web/
 ├── web/
-│   ├── index.html
-│   ├── manifest.json
-│   └── favicon.png
 ├── lib/
-│   ├── main.dart
-│   ├── main_dev.dart
-│   ├── main_staging.dart
-│   ├── main_prod.dart
-│   ├── app.dart
-│   └── config/
-│       └── app_config.dart
+│   └── app/
+│       ├── customer_app/
+│       │   ├── main.dart
+│       │   ├── app.dart
+│       │   ├── config/
+│       │   ├── di/
+│       │   ├── routing/
+│       │   └── features/
+│       ├── driver_app/
+│       │   └── … (same layout)
+│       ├── supervisor_app/
+│       │   └── … (same layout)
+│       └── admin_web/
+│           └── … (same layout)
 ├── test/
 ├── pubspec.yaml
 └── README.md
+```
+
+Run with:
+
+```bash
+flutter run -t lib/app/customer_app/main.dart
+flutter run -t lib/app/driver_app/main.dart
+flutter run -t lib/app/supervisor_app/main.dart
+flutter run -t lib/app/admin_web/main.dart -d chrome
 ```
 
 ---

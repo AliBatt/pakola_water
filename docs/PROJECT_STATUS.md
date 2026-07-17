@@ -2,7 +2,7 @@
 
 > **Living document** — updated after every meaningful change to the repository.
 >
-> Last updated: **2026-07-13**
+> Last updated: **2026-07-17**
 
 ---
 
@@ -24,14 +24,16 @@
 
 ```
 pakola_water/
-├── apps/
-│   ├── customer_app/        ✅ Flutter mobile shell (Provider + GoRouter)
-│   ├── driver_app/          ✅ Flutter mobile shell
-│   ├── supervisor_app/      ✅ Flutter mobile shell
-│   └── admin_web/           ✅ Flutter web shell
+├── pakola_waters/           ✅ Single Flutter project (all 4 apps)
+│   └── lib/app/
+│       ├── customer_app/    ✅ Customer mobile shell
+│       ├── driver_app/      ✅ Driver mobile shell
+│       ├── supervisor_app/  ✅ Supervisor mobile shell
+│       └── admin_web/       ✅ Admin web shell
 ├── packages/
 │   ├── core/                ✅ Result, failures, logging, environment
-│   ├── design_system/       ✅ Material 3 theme
+│   ├── design_system/       ✅ Light/dark Material 3 theme, colors, spacing
+│   ├── l10n/                ✅ English + Urdu ARB localization
 │   ├── firebase/            ✅ Auth/Firestore service wrappers (stub bootstrap)
 │   ├── authentication/      ✅ AuthProvider, LoginScreen, auth routes
 │   ├── models/              ✅ AppUser, enums (AppRole, OrderStatus, UserStatus)
@@ -39,21 +41,20 @@ pakola_water/
 │   ├── services/            ✅ Auth + User services
 │   ├── shared_widgets/      ✅ Loading, Error, Empty state widgets
 │   └── utilities/           ✅ Validators, formatters, extensions
-├── pakola_waters/           ⚠️ Initial Flutter template (can be removed)
 ├── docs/                    ✅ Architecture documentation
 ├── melos.yaml               ✅ Monorepo workspace config
 ├── pubspec.yaml             ✅ Workspace root (Melos)
 └── README.md                ✅ Updated
 ```
 
-### Each app includes
+### Each app folder includes
 
-- `lib/main.dart` — bootstrap with Firebase init + Provider wiring
-- `lib/app.dart` — `MaterialApp.router` with shared theme
-- `lib/config/app_config.dart` — app name, required role, environment
-- `lib/di/app_providers.dart` — dependency injection (Provider)
-- `lib/routing/app_router.dart` — GoRouter with auth/role guards
-- `lib/features/home/home_screen.dart` — placeholder dashboard
+- `main.dart` — bootstrap with Firebase init + Provider wiring
+- `app.dart` — `MaterialApp.router` with shared theme
+- `config/app_config.dart` — app name, required role, environment
+- `di/app_providers.dart` — dependency injection (Provider)
+- `routing/app_router.dart` — GoRouter with auth/role guards
+- `features/home/home_screen.dart` — placeholder dashboard
 
 ### What does NOT exist yet
 

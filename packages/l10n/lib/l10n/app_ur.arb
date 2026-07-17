@@ -1,0 +1,66 @@
+{
+  "@@locale": "ur",
+  "appTitle": "پاکولا واٹرز",
+  "customerAppTitle": "پاکولا واٹرز — گاہک",
+  "driverAppTitle": "پاکولا واٹرز — ڈرائیور",
+  "supervisorAppTitle": "پاکولا واٹرز — سپروائزر",
+  "adminAppTitle": "پاکولا واٹرز — ایڈمن",
+  "loading": "لوڈ ہو رہا ہے...",
+  "retry": "دوبارہ کوشش کریں",
+  "cancel": "منسوخ",
+  "save": "محفوظ کریں",
+  "confirm": "تصدیق",
+  "close": "بند کریں",
+  "ok": "ٹھیک ہے",
+  "errorGeneric": "کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔",
+  "successGeneric": "کامیابی سے مکمل ہو گیا۔",
+  "networkError": "انٹرنیٹ کنکشن نہیں ہے۔",
+  "login": "سائن ان",
+  "logout": "سائن آؤٹ",
+  "email": "ای میل",
+  "password": "پاس ورڈ",
+  "forgotPassword": "پاس ورڈ بھول گئے؟",
+  "comingSoon": "جلد آرہا ہے",
+  "emailRequired": "ای میل ضروری ہے",
+  "emailInvalid": "درست ای میل درج کریں",
+  "passwordRequired": "پاس ورڈ ضروری ہے",
+  "passwordTooShort": "پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے",
+  "welcomeUser": "خوش آمدید، {name}",
+  "@welcomeUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "roleLabel": "کردار: {role}",
+  "@roleLabel": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "statusLabel": "حیثیت: {status}",
+  "@statusLabel": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "customerHomeTitle": "گاہک ڈیش بورڈ",
+  "customerHomeSubtitle": "اپنے پانی کی ڈیلیوری آرڈرز دیں اور ٹریک کریں۔",
+  "driverHomeTitle": "ڈرائیور ڈیش بورڈ",
+  "driverHomeSubtitle": "تفویض شدہ ڈیلیوریز دیکھیں اور مکمل کریں۔",
+  "supervisorHomeTitle": "سپروائزر ڈیش بورڈ",
+  "supervisorHomeSubtitle": "برانچ آرڈرز، ڈرائیورز اور انوینٹری کا انتظام کریں۔",
+  "adminHomeTitle": "ایڈمن ڈیش بورڈ",
+  "adminHomeSubtitle": "برانچز، صارفین، مصنوعات اور رپورٹس کا انتظام کریں۔",
+  "emptyStateDefault": "ابھی یہاں کچھ نہیں ہے۔",
+  "languageEnglish": "انگریزی",
+  "languageUrdu": "اردو",
+  "themeSystem": "سسٹم",
+  "themeLight": "لائٹ",
+  "themeDark": "ڈارک"
+}

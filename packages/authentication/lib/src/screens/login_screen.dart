@@ -1,12 +1,15 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:l10n/l10n.dart';
 import 'package:provider/provider.dart';
-import 'package:utilities/utilities.dart';
+import 'package:shared_widgets/shared_widgets.dart';
 
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  static const String logoAsset = 'assets/images/logo.png';
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -16,82 +19,167 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     final auth = context.read<AuthProvider>();
-    await auth.signIn(
+    final success = await auth.signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
+
+    if (!mounted) return;
+    if (!success && auth.errorMessage != null) {
+      AppSnackBar.error(context, auth.errorMessage!);
+    }
+  }
+
+  void _onForgotPassword() {
+    AppSnackBar.info(context, context.l10n.comingSoon);
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final l10n = context.l10n;
+    final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Pakola Waters',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: FormValidators.email,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(labelText: 'Password'),
-                    obscureText: true,
-                    validator: FormValidators.password,
-                  ),
-                  if (auth.errorMessage != null) ...[
-                    const SizedBox(height: 16),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: AppSpacing.xl),
+                    Center(
+                      child: Image.asset(
+                        LoginScreen.logoAsset,
+                        height: 96,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     Text(
-                      auth.errorMessage!,
-                      style: TextStyle(color: AppColors.error),
+                      l10n.appTitle,
+                      textAlign: TextAlign.center,
+                      style: context.texts.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colors.primary,
+                      ),
                     ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    AppTextField(
+                      controller: _emailController,
+                      focusNode: _emailFocus,
+                      labelText: l10n.email,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.email],
+                      prefix: Icon(Icons.email_outlined, color: colors.onSurfaceVariant),
+                      onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return l10n.emailRequired;
+                        }
+                        final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                        if (!emailRegex.hasMatch(value.trim())) {
+                          return l10n.emailInvalid;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    AppTextField(
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      labelText: l10n.password,
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: const [AutofillHints.password],
+                      prefix: Icon(Icons.lock_outline, color: colors.onSurfaceVariant),
+                      suffix: IconButton(
+                        onPressed: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        },
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        tooltip: _obscurePassword ? l10n.password : l10n.password,
+                      ),
+                      onFieldSubmitted: (_) => _submit(),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return l10n.passwordRequired;
+                        }
+                        if (value.length < 6) {
+                          return l10n.passwordTooShort;
+                        }
+                        return null;
+                      },
+                    ),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: TextButton(
+                        onPressed: auth.isLoading ? null : _onForgotPassword,
+                        child: Text(l10n.forgotPassword),
+                      ),
+                    ),
+                    if (auth.errorMessage != null) ...[
+                      Text(
+                        auth.errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: context.texts.bodyMedium?.copyWith(
+                          color: colors.error,
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: FilledButton(
+                        onPressed: auth.isLoading ? null : _submit,
+                        child: auth.isLoading
+                            ? SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: colors.onPrimary,
+                                ),
+                              )
+                            : Text(l10n.login),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: auth.isLoading ? null : _submit,
-                      child: auth.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Sign In'),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

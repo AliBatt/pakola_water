@@ -1,16 +1,19 @@
 # pakola_waters
 
-A new Flutter project.
+Single Flutter project hosting all four Pakola Waters apps.
 
-## Getting Started
+## Entry points
 
-This project is a starting point for a Flutter application.
+| App | Target |
+|-----|--------|
+| Customer | `lib/app/customer_app/main.dart` |
+| Driver | `lib/app/driver_app/main.dart` |
+| Supervisor | `lib/app/supervisor_app/main.dart` |
+| Admin Web | `lib/app/admin_web/main.dart` |
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run -t lib/app/customer_app/main.dart
+flutter run -t lib/app/driver_app/main.dart
+flutter run -t lib/app/supervisor_app/main.dart
+flutter run -t lib/app/admin_web/main.dart -d chrome
+```
