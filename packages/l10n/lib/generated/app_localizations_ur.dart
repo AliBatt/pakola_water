@@ -126,6 +126,48 @@ class AppLocalizationsUr extends AppLocalizations {
       'برانچز، صارفین، مصنوعات اور رپورٹس کا انتظام کریں۔';
 
   @override
+  String get navHome => 'ہوم';
+
+  @override
+  String get navBranches => 'برانچز';
+
+  @override
+  String get navSupervisors => 'سپروائزرز';
+
+  @override
+  String get navRiders => 'رائڈرز';
+
+  @override
+  String get navCustomers => 'گاہک';
+
+  @override
+  String get navPayments => 'ادائیگیاں';
+
+  @override
+  String get navReports => 'رپورٹس';
+
+  @override
+  String get navInventory => 'انوینٹری';
+
+  @override
+  String get navProducts => 'مصنوعات';
+
+  @override
+  String get navNotifications => 'اطلاعات';
+
+  @override
+  String get navRequests => 'درخواستیں';
+
+  @override
+  String get navOrders => 'آرڈرز';
+
+  @override
+  String get navSettings => 'ترتیبات';
+
+  @override
+  String get navQuickAccess => 'فوری رسائی';
+
+  @override
   String get emptyStateDefault => 'ابھی یہاں کچھ نہیں ہے۔';
 
   @override

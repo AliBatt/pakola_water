@@ -314,6 +314,90 @@ abstract class AppLocalizations {
   /// **'Manage branches, users, products, and reports.'**
   String get adminHomeSubtitle;
 
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'Branches'**
+  String get navBranches;
+
+  /// No description provided for @navSupervisors.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisors'**
+  String get navSupervisors;
+
+  /// No description provided for @navRiders.
+  ///
+  /// In en, this message translates to:
+  /// **'Riders'**
+  String get navRiders;
+
+  /// No description provided for @navCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Customers'**
+  String get navCustomers;
+
+  /// No description provided for @navPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get navPayments;
+
+  /// No description provided for @navReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get navReports;
+
+  /// No description provided for @navInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get navInventory;
+
+  /// No description provided for @navProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get navProducts;
+
+  /// No description provided for @navNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get navNotifications;
+
+  /// No description provided for @navRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get navRequests;
+
+  /// No description provided for @navOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get navOrders;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @navQuickAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick access'**
+  String get navQuickAccess;
+
   /// No description provided for @emptyStateDefault.
   ///
   /// In en, this message translates to:

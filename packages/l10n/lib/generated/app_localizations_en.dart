@@ -126,6 +126,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Manage branches, users, products, and reports.';
 
   @override
+  String get navHome => 'Home';
+
+  @override
+  String get navBranches => 'Branches';
+
+  @override
+  String get navSupervisors => 'Supervisors';
+
+  @override
+  String get navRiders => 'Riders';
+
+  @override
+  String get navCustomers => 'Customers';
+
+  @override
+  String get navPayments => 'Payments';
+
+  @override
+  String get navReports => 'Reports';
+
+  @override
+  String get navInventory => 'Inventory';
+
+  @override
+  String get navProducts => 'Products';
+
+  @override
+  String get navNotifications => 'Notifications';
+
+  @override
+  String get navRequests => 'Requests';
+
+  @override
+  String get navOrders => 'Orders';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get navQuickAccess => 'Quick access';
+
+  @override
   String get emptyStateDefault => 'Nothing here yet.';
 
   @override

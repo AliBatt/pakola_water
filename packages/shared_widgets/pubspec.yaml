@@ -11,6 +11,7 @@ dependencies:
     path: ../design_system
   flutter:
     sdk: flutter
+  intl_phone_field: ^3.2.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0

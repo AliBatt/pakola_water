@@ -16,12 +16,13 @@ packages/
   core/                  # Errors, result types, logging, environment
   design_system/         # Light/dark Material 3 theme, colors, spacing
   l10n/                  # English + Urdu ARB localization
+  rider_management/      # Shared riders CRUD (admin + supervisor apps)
   firebase/              # Firebase SDK wrappers
   authentication/        # Auth provider, login screen, routes
   models/                # Shared data models
   repositories/          # Repository layer
   services/              # Service layer
-  shared_widgets/        # Snackbars, loading/error/empty views
+  shared_widgets/        # Snackbars, phone field, loading/error/empty views
   utilities/             # Validators, formatters, extensions
 ```
 

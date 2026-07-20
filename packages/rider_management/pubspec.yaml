@@ -1,0 +1,29 @@
+name: rider_management
+description: Shared riders (drivers) management UI for admin and supervisor apps.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  core:
+    path: ../core
+  design_system:
+    path: ../design_system
+  flutter:
+    sdk: flutter
+  models:
+    path: ../models
+  provider: ^6.1.5
+  repositories:
+    path: ../repositories
+  services:
+    path: ../services
+  shared_widgets:
+    path: ../shared_widgets
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

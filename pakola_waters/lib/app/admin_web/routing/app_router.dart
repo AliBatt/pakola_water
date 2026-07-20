@@ -1,9 +1,16 @@
 import 'package:authentication/authentication.dart';
-
 import 'package:go_router/go_router.dart';
+import 'package:l10n/l10n.dart';
+import 'package:rider_management/rider_management.dart';
 
 import '../config/app_config.dart';
+import '../features/branches/branches_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/products/products_screen.dart';
+import '../features/shell/admin_placeholder_page.dart';
+import '../features/shell/admin_shell.dart';
+import '../features/supervisors/supervisors_screen.dart';
+import 'admin_routes.dart';
 
 GoRouter createAppRouter({
   required AppConfig config,
@@ -14,7 +21,9 @@ GoRouter createAppRouter({
     refreshListenable: authProvider,
     redirect: (context, state) {
       final auth = authProvider;
-      final isLogin = state.matchedLocation == AuthRoutes.login;
+      final location = state.matchedLocation;
+      final isLogin = location == AuthRoutes.login;
+      final isAdminRoute = AdminRoutes.all.contains(location);
 
       if (auth.status == AuthStatus.unknown) {
         return null;
@@ -31,7 +40,11 @@ GoRouter createAppRouter({
       }
 
       if (isLogin) {
-        return AuthRoutes.home;
+        return AdminRoutes.home;
+      }
+
+      if (!isAdminRoute && !isLogin) {
+        return AdminRoutes.home;
       }
 
       return null;
@@ -41,9 +54,104 @@ GoRouter createAppRouter({
         path: AuthRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
-      GoRoute(
-        path: AuthRoutes.home,
-        builder: (context, state) => HomeScreen(config: config),
+      ShellRoute(
+        builder: (context, state, child) => AdminShell(child: child),
+        routes: [
+          GoRoute(
+            path: AdminRoutes.home,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: HomeScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.branches,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: BranchesScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.supervisors,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: SupervisorsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.riders,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: RidersScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.customers,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navCustomers,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.payments,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navPayments,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.reports,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navReports,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.inventory,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navInventory,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.products,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ProductsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.notifications,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navNotifications,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.requests,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navRequests,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.orders,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navOrders,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AdminRoutes.settings,
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: AdminPlaceholderPage(
+                title: context.l10n.navSettings,
+              ),
+            ),
+          ),
+        ],
       ),
     ],
   );
