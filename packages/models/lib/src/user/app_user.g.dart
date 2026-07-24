@@ -9,6 +9,9 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) => AppUser(
       displayName: json['displayName'] as String? ?? '',
       phone: json['phone'] as String?,
       address: json['address'] as String?,
+      location: json['location'] is Map<String, dynamic>
+          ? GeoLocation.fromJson(json['location'] as Map<String, dynamic>)
+          : null,
       notes: json['notes'] as String?,
       cnic: json['cnic'] as String?,
       experience: json['experience'] as String?,
@@ -30,6 +33,7 @@ Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
       'displayName': instance.displayName,
       'phone': instance.phone,
       'address': instance.address,
+      if (instance.location != null) 'location': instance.location!.toJson(),
       'notes': instance.notes,
       'cnic': instance.cnic,
       'experience': instance.experience,

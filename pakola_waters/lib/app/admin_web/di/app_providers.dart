@@ -37,10 +37,13 @@ class AppProviders {
     );
     final branchService = BranchServiceImpl(firestoreService);
     final productService = ProductServiceImpl(firestoreService);
+    final notificationService = NotificationServiceImpl(firestoreService);
     final authRepository = AuthRepositoryImpl(authService);
     final userRepository = UserRepositoryImpl(userService);
     final branchRepository = BranchRepositoryImpl(branchService);
     final productRepository = ProductRepositoryImpl(productService);
+    final notificationRepository =
+        NotificationRepositoryImpl(notificationService);
 
     final authProvider = AuthProvider(
       authRepository: authRepository,
@@ -55,6 +58,7 @@ class AppProviders {
         Provider<UserRepository>.value(value: userRepository),
         Provider<BranchRepository>.value(value: branchRepository),
         Provider<ProductRepository>.value(value: productRepository),
+        Provider<NotificationRepository>.value(value: notificationRepository),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
         ChangeNotifierProvider(
           create: (_) => SupervisorsController(

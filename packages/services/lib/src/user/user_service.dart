@@ -21,6 +21,15 @@ class CreateUserAccountResult {
 abstract class UserService {
   Future<Result<AppUser?>> getCurrentUserProfile();
   Future<Result<List<AppUser>>> listByRole(AppRole role);
+  Future<Result<AppUser>> createSelfProfile({
+    required String email,
+    required String displayName,
+    required String phone,
+    required String address,
+    required GeoLocation location,
+    required String primaryBranchId,
+    List<String> branchIds = const [],
+  });
   Future<Result<CreateUserAccountResult>> createUserProfile({
     required String displayName,
     required String phone,
@@ -91,6 +100,49 @@ class UserServiceImpl implements UserService {
         ..sort((a, b) => a.displayName.compareTo(b.displayName));
 
       return Success(users);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<AppUser>> createSelfProfile({
+    required String email,
+    required String displayName,
+    required String phone,
+    required String address,
+    required GeoLocation location,
+    required String primaryBranchId,
+    List<String> branchIds = const [],
+  }) async {
+    final userId = _authService.currentUserId;
+    if (userId == null) {
+      return const FailureResult(AuthFailure('Not signed in'));
+    }
+
+    try {
+      final resolvedBranches =
+          branchIds.isEmpty ? [primaryBranchId] : branchIds;
+      final user = AppUser(
+        id: userId,
+        email: email.trim(),
+        displayName: displayName.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        location: location,
+        role: AppRole.customer,
+        status: UserStatus.active,
+        branchIds: resolvedBranches,
+        primaryBranchId: primaryBranchId,
+      );
+
+      final data = user.toJson()
+        ..remove('id')
+        ..['createdAt'] = FieldValue.serverTimestamp()
+        ..['updatedAt'] = FieldValue.serverTimestamp();
+
+      await _firestoreService.setDoc(CollectionPaths.users, userId, data);
+      return Success(user);
     } catch (error) {
       return FailureResult(ServerFailure(error.toString()));
     }

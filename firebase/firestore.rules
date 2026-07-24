@@ -17,27 +17,95 @@ service cloud.firestore {
       return signedIn() && userData().role == 'supervisor';
     }
 
+    function isDriver() {
+      return signedIn() && userData().role == 'driver';
+    }
+
+    function isStaff() {
+      return isAdmin() || isSupervisor() || isDriver();
+    }
+
     match /users/{userId} {
       allow read: if isAdmin()
         || isSupervisor()
         || (signedIn() && request.auth.uid == userId);
 
       allow create: if isAdmin()
-        || (isSupervisor() && request.resource.data.role == 'driver');
+        || (isSupervisor() && request.resource.data.role == 'driver')
+        || (signedIn()
+          && request.auth.uid == userId
+          && request.resource.data.role == 'customer');
 
       allow update, delete: if isAdmin()
         || (isSupervisor() && resource.data.role == 'driver')
         || (signedIn() && request.auth.uid == userId);
     }
 
+    // Public branch list for signup nearest-branch selection.
     match /branches/{branchId} {
-      allow read: if isAdmin() || isSupervisor();
+      allow read: if true;
       allow write: if isAdmin();
     }
 
     match /products/{productId} {
       allow read: if signedIn();
       allow write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow read: if isAdmin()
+        || isSupervisor()
+        || (signedIn() && resource.data.customerId == request.auth.uid);
+
+      allow create: if signedIn()
+        && request.resource.data.customerId == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'customerId', 'branchId', 'productId', 'productName',
+          'quantity', 'unitPrice', 'lineTotal', 'paymentMethod', 'status'
+        ])
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity >= 1
+        && request.resource.data.paymentMethod in ['cod', 'credit']
+        && request.resource.data.status == 'pending';
+
+      allow update: if isAdmin()
+        || isSupervisor()
+        || (signedIn()
+          && resource.data.customerId == request.auth.uid
+          && resource.data.status == 'riderArrived'
+          && request.resource.data.status == 'delivered'
+          && request.resource.data.customerId == resource.data.customerId
+          && request.resource.data.branchId == resource.data.branchId
+          && request.resource.data.productId == resource.data.productId);
+
+      allow delete: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if isStaff()
+        && request.resource.data.keys().hasAll([
+          'userId', 'title', 'body', 'createdById', 'createdByRole', 'read'
+        ])
+        && request.resource.data.createdById == request.auth.uid
+        && request.resource.data.createdByRole in ['admin', 'supervisor', 'driver']
+        && request.resource.data.read == false
+        && request.resource.data.title is string
+        && request.resource.data.body is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.body.size() > 0;
+
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.title == resource.data.title
+        && request.resource.data.body == resource.data.body
+        && request.resource.data.read == true;
+
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
     }
 
     match /{document=**} {

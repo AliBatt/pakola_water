@@ -42,6 +42,8 @@ dependencies:
   shared_widgets:
     path: ../packages/shared_widgets
   uuid: ^4.5.1
+  geolocator: ^14.0.1
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_lints: ^6.0.0

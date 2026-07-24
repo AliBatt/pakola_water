@@ -25,7 +25,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final providers = AppProviders.create();
+  final providers = await AppProviders.create();
   final authProvider = providers.authProvider;
   final router = createAppRouter(config: config, authProvider: authProvider);
 

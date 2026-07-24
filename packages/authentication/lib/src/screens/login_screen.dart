@@ -7,9 +7,15 @@ import 'package:shared_widgets/shared_widgets.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+    this.onSignUp,
+  });
 
   static const String logoAsset = 'assets/images/logo.png';
+
+  /// When set, shows a "Create an account" action (customer app).
+  final VoidCallback? onSignUp;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -51,8 +57,24 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _onForgotPassword() {
-    AppSnackBar.info(context, context.l10n.comingSoon);
+  void _onForgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      AppSnackBar.warning(context, 'Enter your email first');
+      return;
+    }
+
+    final auth = context.read<AuthProvider>();
+    final success = await auth.sendPasswordResetEmail(email);
+    if (!mounted) return;
+    if (success) {
+      AppSnackBar.success(
+        context,
+        'Password reset email sent. Check your inbox.',
+      );
+    } else if (auth.errorMessage != null) {
+      AppSnackBar.error(context, auth.errorMessage!);
+    }
   }
 
   @override
@@ -177,6 +199,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             : Text(l10n.login),
                       ),
                     ),
+                    if (widget.onSignUp != null) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      TextButton(
+                        onPressed: auth.isLoading ? null : widget.onSignUp,
+                        child: Text(context.l10n.createAccount),
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.lg),
                   ],
                 ),

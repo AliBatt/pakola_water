@@ -6,6 +6,7 @@ import 'package:rider_management/rider_management.dart';
 import '../config/app_config.dart';
 import '../features/branches/branches_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/notifications/admin_notifications_screen.dart';
 import '../features/products/products_screen.dart';
 import '../features/shell/admin_placeholder_page.dart';
 import '../features/shell/admin_shell.dart';
@@ -121,10 +122,8 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: AdminRoutes.notifications,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navNotifications,
-              ),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdminNotificationsScreen(),
             ),
           ),
           GoRoute(

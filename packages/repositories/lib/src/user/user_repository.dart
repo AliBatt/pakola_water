@@ -5,6 +5,15 @@ import 'package:services/services.dart';
 abstract class UserRepository {
   Future<Result<AppUser?>> getCurrentUser();
   Future<Result<List<AppUser>>> listByRole(AppRole role);
+  Future<Result<AppUser>> createSelfProfile({
+    required String email,
+    required String displayName,
+    required String phone,
+    required String address,
+    required GeoLocation location,
+    required String primaryBranchId,
+    List<String> branchIds = const [],
+  });
   Future<Result<CreateUserAccountResult>> createUser({
     required String displayName,
     required String phone,
@@ -37,6 +46,27 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<Result<List<AppUser>>> listByRole(AppRole role) {
     return _userService.listByRole(role);
+  }
+
+  @override
+  Future<Result<AppUser>> createSelfProfile({
+    required String email,
+    required String displayName,
+    required String phone,
+    required String address,
+    required GeoLocation location,
+    required String primaryBranchId,
+    List<String> branchIds = const [],
+  }) {
+    return _userService.createSelfProfile(
+      email: email,
+      displayName: displayName,
+      phone: phone,
+      address: address,
+      location: location,
+      primaryBranchId: primaryBranchId,
+      branchIds: branchIds,
+    );
   }
 
   @override

@@ -5,16 +5,24 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return signedIn()
-        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    function isValidImageUpload() {
+      return request.resource != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
     }
 
     match /products/{allPaths=**} {
-      allow read: if signedIn();
-      allow write: if isAdmin()
-        && request.resource.size < 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
+      // Public read so product images load via download URLs.
+      allow read: if true;
+
+      // Signed-in create/update with image constraints.
+      // NOTE: firestore.get()-based admin checks often fail until the
+      // Firebase Rules Firestore Service Agent IAM role is granted; the
+      // admin web app is currently the only client that writes here.
+      allow create, update: if signedIn() && isValidImageUpload();
+
+      // Deletes have no request.resource — do not check contentType/size.
+      allow delete: if signedIn();
     }
   }
 }

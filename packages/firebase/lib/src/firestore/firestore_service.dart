@@ -44,4 +44,32 @@ class FirestoreService {
   }) {
     return collection(path).where(field, isEqualTo: isEqualTo).get();
   }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> watchDoc(
+    String path,
+    String id,
+  ) {
+    return doc(path, id).snapshots();
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchWhere(
+    String path, {
+    required String field,
+    required Object isEqualTo,
+  }) {
+    return collection(path).where(field, isEqualTo: isEqualTo).snapshots();
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchWhereOrderBy(
+    String path, {
+    required String field,
+    required Object isEqualTo,
+    required String orderBy,
+    bool descending = true,
+  }) {
+    return collection(path)
+        .where(field, isEqualTo: isEqualTo)
+        .orderBy(orderBy, descending: descending)
+        .snapshots();
+  }
 }

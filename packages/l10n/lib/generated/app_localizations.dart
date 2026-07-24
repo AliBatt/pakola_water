@@ -433,6 +433,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get themeDark;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @languageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose app display language'**
+  String get languageSubtitle;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPassword;
+
+  /// No description provided for @resetPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a reset link to your email'**
+  String get resetPasswordSubtitle;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove your account and profile'**
+  String get deleteAccountSubtitle;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone. Your profile will be removed and you will be signed out.'**
+  String get deleteAccountConfirmBody;
+
+  /// No description provided for @deleteAccountSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted'**
+  String get deleteAccountSuccess;
+
+  /// No description provided for @deleteAccountReauthRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in again, then delete your account.'**
+  String get deleteAccountReauthRequired;
+
+  /// No description provided for @noOngoingOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'No ongoing order'**
+  String get noOngoingOrder;
+
+  /// No description provided for @noOngoingOrderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse products and place an order when you need water.'**
+  String get noOngoingOrderSubtitle;
+
+  /// No description provided for @browseProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse products'**
+  String get browseProducts;
+
+  /// No description provided for @ongoingOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing order'**
+  String get ongoingOrder;
+
+  /// No description provided for @confirmDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delivery'**
+  String get confirmDelivery;
+
+  /// No description provided for @confirmDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm delivery?'**
+  String get confirmDeliveryTitle;
+
+  /// No description provided for @confirmDeliveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm that you received this order and it is complete.'**
+  String get confirmDeliveryBody;
+
+  /// No description provided for @orderCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Order completed. Thank you!'**
+  String get orderCompleted;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @order.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get order;
+
+  /// No description provided for @newOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'New order'**
+  String get newOrder;
+
+  /// No description provided for @noProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'No products'**
+  String get noProducts;
+
+  /// No description provided for @noProductsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back soon for available products.'**
+  String get noProductsSubtitle;
+
+  /// No description provided for @noOrdersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get noOrdersYet;
+
+  /// No description provided for @noOrdersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order history will appear here.'**
+  String get noOrdersSubtitle;
+
+  /// No description provided for @activeOrderBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish your current order before placing a new one'**
+  String get activeOrderBlock;
+
+  /// No description provided for @placeOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Place order'**
+  String get placeOrder;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @extraNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra note (optional)'**
+  String get extraNote;
+
+  /// No description provided for @payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get payment;
+
+  /// No description provided for @orderPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Order placed'**
+  String get orderPlaced;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates from Pakola Waters will appear here.'**
+  String get notificationsEmptySubtitle;
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get markAllRead;
+
+  /// No description provided for @notificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification sent'**
+  String get notificationSent;
+
+  /// No description provided for @sendNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send notification'**
+  String get sendNotification;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get notificationTitle;
+
+  /// No description provided for @notificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get notificationBody;
+
+  /// No description provided for @selectCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Select customer'**
+  String get selectCustomer;
+
+  /// No description provided for @fromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name}'**
+  String fromLabel(String name);
+
+  /// No description provided for @unread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get unread;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account'**
+  String get createAccount;
 }
 
 class _AppLocalizationsDelegate

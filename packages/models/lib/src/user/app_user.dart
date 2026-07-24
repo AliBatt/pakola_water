@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../common/geo_location.dart';
 import '../enums/app_role.dart';
 import '../enums/user_status.dart';
 
@@ -15,6 +16,7 @@ class AppUser {
     required this.status,
     this.phone,
     this.address,
+    this.location,
     this.notes,
     this.cnic,
     this.experience,
@@ -31,6 +33,7 @@ class AppUser {
   final String displayName;
   final String? phone;
   final String? address;
+  final GeoLocation? location;
   final String? notes;
   final String? cnic;
   final String? experience;
@@ -50,6 +53,7 @@ class AppUser {
     String? displayName,
     String? phone,
     String? address,
+    GeoLocation? location,
     String? notes,
     String? cnic,
     String? experience,
@@ -59,6 +63,7 @@ class AppUser {
     List<String>? branchIds,
     String? primaryBranchId,
     bool clearPrimaryBranch = false,
+    bool clearLocation = false,
   }) {
     return AppUser(
       id: id ?? this.id,
@@ -66,6 +71,7 @@ class AppUser {
       displayName: displayName ?? this.displayName,
       phone: phone ?? this.phone,
       address: address ?? this.address,
+      location: clearLocation ? null : (location ?? this.location),
       notes: notes ?? this.notes,
       cnic: cnic ?? this.cnic,
       experience: experience ?? this.experience,

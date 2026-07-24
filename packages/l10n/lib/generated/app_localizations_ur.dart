@@ -184,4 +184,138 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get themeDark => 'ڈارک';
+
+  @override
+  String get language => 'زبان';
+
+  @override
+  String get languageSubtitle => 'ایپ کی زبان منتخب کریں';
+
+  @override
+  String get resetPassword => 'پاس ورڈ ری سیٹ';
+
+  @override
+  String get resetPasswordSubtitle => 'اپنے ای میل پر ری سیٹ لنک بھیجیں';
+
+  @override
+  String get deleteAccount => 'اکاؤنٹ حذف کریں';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'اپنا اکاؤنٹ اور پروفائل مستقل طور پر ہٹا دیں';
+
+  @override
+  String get deleteAccountConfirmTitle => 'اکاؤنٹ حذف کریں؟';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'یہ واپس نہیں ہو سکتا۔ آپ کا پروفائل حذف ہو جائے گا اور آپ سائن آؤٹ ہو جائیں گے۔';
+
+  @override
+  String get deleteAccountSuccess => 'اکاؤنٹ حذف ہو گیا';
+
+  @override
+  String get deleteAccountReauthRequired =>
+      'براہ کرم دوبارہ سائن ان کریں، پھر اکاؤنٹ حذف کریں۔';
+
+  @override
+  String get noOngoingOrder => 'کوئی جاری آرڈر نہیں';
+
+  @override
+  String get noOngoingOrderSubtitle =>
+      'مصنوعات دیکھیں اور پانی کی ضرورت پر آرڈر دیں۔';
+
+  @override
+  String get browseProducts => 'مصنوعات دیکھیں';
+
+  @override
+  String get ongoingOrder => 'جاری آرڈر';
+
+  @override
+  String get confirmDelivery => 'ڈیلیوری کی تصدیق';
+
+  @override
+  String get confirmDeliveryTitle => 'ڈیلیوری کی تصدیق؟';
+
+  @override
+  String get confirmDeliveryBody =>
+      'تصدیق کریں کہ آپ کو آرڈر مل گیا اور یہ مکمل ہے۔';
+
+  @override
+  String get orderCompleted => 'آرڈر مکمل۔ شکریہ!';
+
+  @override
+  String get search => 'تلاش';
+
+  @override
+  String get order => 'آرڈر';
+
+  @override
+  String get newOrder => 'نیا آرڈر';
+
+  @override
+  String get noProducts => 'کوئی مصنوعات نہیں';
+
+  @override
+  String get noProductsSubtitle => 'جلد دستیاب مصنوعات چیک کریں۔';
+
+  @override
+  String get noOrdersYet => 'ابھی کوئی آرڈر نہیں';
+
+  @override
+  String get noOrdersSubtitle => 'آپ کی آرڈر ہسٹری یہاں دکھائی دے گی۔';
+
+  @override
+  String get activeOrderBlock => 'نیا آرڈر دینے سے پہلے موجودہ آرڈر مکمل کریں';
+
+  @override
+  String get placeOrder => 'آرڈر دیں';
+
+  @override
+  String get quantity => 'مقدار';
+
+  @override
+  String get extraNote => 'اضافی نوٹ (اختیاری)';
+
+  @override
+  String get payment => 'ادائیگی';
+
+  @override
+  String get orderPlaced => 'آرڈر دے دیا گیا';
+
+  @override
+  String get notificationsEmpty => 'کوئی اطلاع نہیں';
+
+  @override
+  String get notificationsEmptySubtitle =>
+      'پاکولا واٹرز کی اپڈیٹس یہاں دکھائی دیں گی۔';
+
+  @override
+  String get markAllRead => 'سب پڑھے ہوئے نشان زد کریں';
+
+  @override
+  String get notificationSent => 'اطلاع بھیج دی گئی';
+
+  @override
+  String get sendNotification => 'اطلاع بھیجیں';
+
+  @override
+  String get notificationTitle => 'عنوان';
+
+  @override
+  String get notificationBody => 'پیغام';
+
+  @override
+  String get selectCustomer => 'گاہک منتخب کریں';
+
+  @override
+  String fromLabel(String name) {
+    return 'از $name';
+  }
+
+  @override
+  String get unread => 'نئی';
+
+  @override
+  String get createAccount => 'اکاؤنٹ بنائیں';
 }

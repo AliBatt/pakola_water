@@ -26,6 +26,7 @@ class AuthProvider extends ChangeNotifier {
   AppUser? _user;
   String? _errorMessage;
   bool _isLoading = false;
+  bool _isSigningUp = false;
   StreamSubscription<String?>? _authSubscription;
 
   AuthStatus get status => _status;
@@ -38,6 +39,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _onAuthChanged(String? userId) async {
+    if (_isSigningUp) return;
+
     if (userId == null) {
       _user = null;
       _status = AuthStatus.unauthenticated;
@@ -59,6 +62,7 @@ class AuthProvider extends ChangeNotifier {
       case Success<AppUser?>(:final value):
         _user = value;
         if (value == null) {
+          // Auth exists but profile not written yet (mid-signup).
           _status = AuthStatus.unauthenticated;
         } else if (value.status == UserStatus.suspended) {
           _status = AuthStatus.suspended;
@@ -89,6 +93,129 @@ class AuthProvider extends ChangeNotifier {
 
     return switch (result) {
       Success<void>() => () {
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }(),
+      FailureResult<void>(:final failure) => () {
+          _errorMessage = failure.message;
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }(),
+    };
+  }
+
+  /// Creates Auth account + Firestore customer profile, then refreshes session.
+  Future<bool> signUpCustomer({
+    required String email,
+    required String password,
+    required String displayName,
+    required String phone,
+    required String address,
+    required GeoLocation location,
+    required String primaryBranchId,
+  }) async {
+    _isLoading = true;
+    _isSigningUp = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final authResult = await _authRepository.signUp(
+      email: email,
+      password: password,
+    );
+
+    switch (authResult) {
+      case FailureResult<void>(:final failure):
+        _errorMessage = failure.message;
+        _isLoading = false;
+        _isSigningUp = false;
+        notifyListeners();
+        return false;
+      case Success<void>():
+        break;
+    }
+
+    final profileResult = await _userRepository.createSelfProfile(
+      email: email,
+      displayName: displayName,
+      phone: phone,
+      address: address,
+      location: location,
+      primaryBranchId: primaryBranchId,
+      branchIds: [primaryBranchId],
+    );
+
+    _isSigningUp = false;
+
+    return switch (profileResult) {
+      Success<AppUser>(:final value) => () {
+          _user = value;
+          _status = AuthStatus.authenticated;
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }(),
+      FailureResult<AppUser>(:final failure) => () {
+          _errorMessage = failure.message;
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }(),
+    };
+  }
+
+  Future<bool> sendPasswordResetEmail(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await _authRepository.sendPasswordResetEmail(email);
+
+    return switch (result) {
+      Success<void>() => () {
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }(),
+      FailureResult<void>(:final failure) => () {
+          _errorMessage = failure.message;
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }(),
+    };
+  }
+
+  Future<void> refreshProfile() => _loadUserProfile();
+
+  /// Deletes Firestore profile then Firebase Auth user.
+  Future<bool> deleteAccount() async {
+    final userId = _user?.id;
+    if (userId == null) {
+      _errorMessage = 'Not signed in';
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final profileResult = await _userRepository.deleteUser(userId);
+    if (profileResult case FailureResult(:final failure)) {
+      _errorMessage = failure.message;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final authResult = await _authRepository.deleteAccount();
+    return switch (authResult) {
+      Success<void>() => () {
+          _user = null;
+          _status = AuthStatus.unauthenticated;
           _isLoading = false;
           notifyListeners();
           return true;

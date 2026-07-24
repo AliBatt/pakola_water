@@ -184,4 +184,139 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeDark => 'Dark';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get languageSubtitle => 'Choose app display language';
+
+  @override
+  String get resetPassword => 'Reset password';
+
+  @override
+  String get resetPasswordSubtitle => 'Send a reset link to your email';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Permanently remove your account and profile';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete account?';
+
+  @override
+  String get deleteAccountConfirmBody =>
+      'This cannot be undone. Your profile will be removed and you will be signed out.';
+
+  @override
+  String get deleteAccountSuccess => 'Account deleted';
+
+  @override
+  String get deleteAccountReauthRequired =>
+      'Please sign in again, then delete your account.';
+
+  @override
+  String get noOngoingOrder => 'No ongoing order';
+
+  @override
+  String get noOngoingOrderSubtitle =>
+      'Browse products and place an order when you need water.';
+
+  @override
+  String get browseProducts => 'Browse products';
+
+  @override
+  String get ongoingOrder => 'Ongoing order';
+
+  @override
+  String get confirmDelivery => 'Confirm delivery';
+
+  @override
+  String get confirmDeliveryTitle => 'Confirm delivery?';
+
+  @override
+  String get confirmDeliveryBody =>
+      'Confirm that you received this order and it is complete.';
+
+  @override
+  String get orderCompleted => 'Order completed. Thank you!';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get order => 'Order';
+
+  @override
+  String get newOrder => 'New order';
+
+  @override
+  String get noProducts => 'No products';
+
+  @override
+  String get noProductsSubtitle => 'Check back soon for available products.';
+
+  @override
+  String get noOrdersYet => 'No orders yet';
+
+  @override
+  String get noOrdersSubtitle => 'Your order history will appear here.';
+
+  @override
+  String get activeOrderBlock =>
+      'Finish your current order before placing a new one';
+
+  @override
+  String get placeOrder => 'Place order';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get extraNote => 'Extra note (optional)';
+
+  @override
+  String get payment => 'Payment';
+
+  @override
+  String get orderPlaced => 'Order placed';
+
+  @override
+  String get notificationsEmpty => 'No notifications';
+
+  @override
+  String get notificationsEmptySubtitle =>
+      'Updates from Pakola Waters will appear here.';
+
+  @override
+  String get markAllRead => 'Mark all read';
+
+  @override
+  String get notificationSent => 'Notification sent';
+
+  @override
+  String get sendNotification => 'Send notification';
+
+  @override
+  String get notificationTitle => 'Title';
+
+  @override
+  String get notificationBody => 'Message';
+
+  @override
+  String get selectCustomer => 'Select customer';
+
+  @override
+  String fromLabel(String name) {
+    return 'From $name';
+  }
+
+  @override
+  String get unread => 'Unread';
+
+  @override
+  String get createAccount => 'Create an account';
 }
