@@ -55,6 +55,7 @@ service cloud.firestore {
     match /orders/{orderId} {
       allow read: if isAdmin()
         || isSupervisor()
+        || (isDriver() && resource.data.riderId == request.auth.uid)
         || (signedIn() && resource.data.customerId == request.auth.uid);
 
       allow create: if signedIn()
@@ -70,6 +71,17 @@ service cloud.firestore {
 
       allow update: if isAdmin()
         || isSupervisor()
+        || (isDriver()
+          && resource.data.riderId == request.auth.uid
+          && (
+            (resource.data.status == 'assigned'
+              && request.resource.data.status == 'outForDelivery')
+            || (resource.data.status == 'outForDelivery'
+              && request.resource.data.status == 'riderArrived')
+          )
+          && request.resource.data.riderId == resource.data.riderId
+          && request.resource.data.customerId == resource.data.customerId
+          && request.resource.data.branchId == resource.data.branchId)
         || (signedIn()
           && resource.data.customerId == request.auth.uid
           && resource.data.status == 'riderArrived'
@@ -79,6 +91,39 @@ service cloud.firestore {
           && request.resource.data.productId == resource.data.productId);
 
       allow delete: if isAdmin();
+    }
+
+    match /orders/{orderId}/messages/{messageId} {
+      function orderData() {
+        return get(/databases/$(database)/documents/orders/$(orderId)).data;
+      }
+
+      allow read: if isAdmin()
+        || isSupervisor()
+        || (signedIn() && orderData().customerId == request.auth.uid);
+
+      allow create: if isStaff()
+        && request.resource.data.createdById == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'message', 'type', 'createdById', 'createdByName', 'createdByRole'
+        ])
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        || (signedIn()
+          && orderData().customerId == request.auth.uid
+          && request.resource.data.createdById == request.auth.uid
+          && request.resource.data.createdByRole == 'customer'
+          && request.resource.data.message is string
+          && request.resource.data.message.size() > 0
+          && (
+            (request.resource.data.type == 'customerMessage'
+              && orderData().status in [
+                'pending', 'supervisorNotified', 'assigned',
+                'outForDelivery', 'riderArrived'
+              ])
+            || (request.resource.data.type == 'review'
+              && orderData().status == 'delivered')
+          ));
     }
 
     match /notifications/{notificationId} {

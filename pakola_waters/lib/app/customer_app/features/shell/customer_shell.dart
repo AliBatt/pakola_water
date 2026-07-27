@@ -1,22 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:l10n/l10n.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../shared/push/app_push_controller.dart';
 import '../../routing/customer_routes.dart';
 
-class CustomerShell extends StatelessWidget {
+class CustomerShell extends StatefulWidget {
   const CustomerShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   @override
+  State<CustomerShell> createState() => _CustomerShellState();
+}
+
+class _CustomerShellState extends State<CustomerShell> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<AppPushController>().ensureStarted();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      body: navigationShell,
+      body: widget.navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: navigationShell.goBranch,
+        selectedIndex: widget.navigationShell.currentIndex,
+        onDestinationSelected: widget.navigationShell.goBranch,
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.home_outlined),

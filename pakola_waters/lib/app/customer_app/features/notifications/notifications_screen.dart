@@ -1,23 +1,18 @@
 import 'package:core/core.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:l10n/l10n.dart';
 import 'package:models/models.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
+import 'package:utilities/utilities.dart';
 
+import '../../../../shared/push/customer_push_navigator.dart';
 import 'notifications_controller.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
-
-  String _formatTs(String? value) {
-    if (value == null || value.isEmpty) return '';
-    final dt = DateTime.tryParse(value);
-    if (dt == null) return value;
-    return DateFormat('dd MMM, hh:mm a').format(dt.toLocal());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +49,22 @@ class NotificationsScreen extends StatelessWidget {
                 final notification = controller.notifications[index];
                 return _NotificationTile(
                   notification: notification,
-                  timestamp: _formatTs(notification.createdAt),
+                  timestamp: DateTimeFormatter.format(notification.createdAt),
                   onTap: () async {
                     if (!notification.read) {
                       await controller.markRead(notification.id);
                     }
+                    if (!context.mounted) return;
+                    CustomerPushNavigator.openFromData(
+                      GoRouter.of(context),
+                      {
+                        'type': notification.type,
+                        'orderId': notification.orderId ?? '',
+                        'route': CustomerPushNavigator.routeForType(
+                          notification.type,
+                        ),
+                      },
+                    );
                   },
                 );
               },

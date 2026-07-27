@@ -8,7 +8,10 @@ import 'package:rider_management/rider_management.dart';
 import 'package:services/services.dart';
 
 import '../features/branches/branches_controller.dart';
+import '../features/orders/admin_orders_controller.dart';
+import '../features/payments/admin_payments_controller.dart';
 import '../features/products/products_controller.dart';
+import '../features/reports/admin_reports_controller.dart';
 import '../features/supervisors/supervisors_controller.dart';
 
 class AppProvidersResult {
@@ -38,12 +41,22 @@ class AppProviders {
     final branchService = BranchServiceImpl(firestoreService);
     final productService = ProductServiceImpl(firestoreService);
     final notificationService = NotificationServiceImpl(firestoreService);
+    final orderService = OrderServiceImpl(firestoreService);
+    final orderMessageService = OrderMessageServiceImpl(
+      firestoreService,
+      notificationService,
+      userService,
+    );
+
     final authRepository = AuthRepositoryImpl(authService);
     final userRepository = UserRepositoryImpl(userService);
     final branchRepository = BranchRepositoryImpl(branchService);
     final productRepository = ProductRepositoryImpl(productService);
     final notificationRepository =
         NotificationRepositoryImpl(notificationService);
+    final orderRepository = OrderRepositoryImpl(orderService);
+    final orderMessageRepository =
+        OrderMessageRepositoryImpl(orderMessageService);
 
     final authProvider = AuthProvider(
       authRepository: authRepository,
@@ -59,6 +72,8 @@ class AppProviders {
         Provider<BranchRepository>.value(value: branchRepository),
         Provider<ProductRepository>.value(value: productRepository),
         Provider<NotificationRepository>.value(value: notificationRepository),
+        Provider<OrderRepository>.value(value: orderRepository),
+        Provider<OrderMessageRepository>.value(value: orderMessageRepository),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
         ChangeNotifierProvider(
           create: (_) => SupervisorsController(
@@ -81,6 +96,26 @@ class AppProviders {
         ChangeNotifierProvider(
           create: (_) => ProductsController(
             productRepository: productRepository,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdminOrdersController(
+            orderRepository: orderRepository,
+            branchRepository: branchRepository,
+            userRepository: userRepository,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdminReportsController(
+            orderRepository: orderRepository,
+            branchRepository: branchRepository,
+            userRepository: userRepository,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdminPaymentsController(
+            orderRepository: orderRepository,
+            notificationRepository: notificationRepository,
           ),
         ),
       ],

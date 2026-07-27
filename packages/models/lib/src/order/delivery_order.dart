@@ -1,6 +1,7 @@
 import '../common/geo_location.dart';
 import '../enums/order_status.dart';
 import '../enums/payment_method.dart';
+import '../enums/payment_status.dart';
 
 class DeliveryOrder {
   const DeliveryOrder({
@@ -18,15 +19,22 @@ class DeliveryOrder {
     this.customerPhone,
     this.branchName,
     this.note,
-    this.paymentStatus = 'pending',
+    this.paymentStatus = PaymentStatus.pending,
     this.supervisorId,
+    this.supervisorName,
     this.riderId,
     this.riderName,
     this.estimatedArrivalAt,
     this.supervisorNotifiedAt,
     this.assignedAt,
+    this.outForDeliveryAt,
     this.riderArrivedAt,
     this.deliveredAt,
+    this.failedAt,
+    this.failureReason,
+    this.adminNotes,
+    this.adminActionById,
+    this.adminActionByName,
     this.createdAt,
     this.updatedAt,
     this.deliveryAddress,
@@ -50,16 +58,25 @@ class DeliveryOrder {
       paymentMethod: PaymentMethod.fromString(
         json['paymentMethod'] as String? ?? 'cod',
       ),
-      paymentStatus: json['paymentStatus'] as String? ?? 'pending',
+      paymentStatus: PaymentStatus.fromString(
+        json['paymentStatus'] as String? ?? 'pending',
+      ),
       status: OrderStatus.fromString(json['status'] as String? ?? 'pending'),
       supervisorId: json['supervisorId'] as String?,
+      supervisorName: json['supervisorName'] as String?,
       riderId: json['riderId'] as String?,
       riderName: json['riderName'] as String?,
       estimatedArrivalAt: json['estimatedArrivalAt']?.toString(),
       supervisorNotifiedAt: json['supervisorNotifiedAt']?.toString(),
       assignedAt: json['assignedAt']?.toString(),
+      outForDeliveryAt: json['outForDeliveryAt']?.toString(),
       riderArrivedAt: json['riderArrivedAt']?.toString(),
       deliveredAt: json['deliveredAt']?.toString(),
+      failedAt: json['failedAt']?.toString(),
+      failureReason: json['failureReason'] as String?,
+      adminNotes: json['adminNotes'] as String?,
+      adminActionById: json['adminActionById'] as String?,
+      adminActionByName: json['adminActionByName'] as String?,
       createdAt: json['createdAt']?.toString(),
       updatedAt: json['updatedAt']?.toString(),
       deliveryAddress: json['deliveryAddress'] as String?,
@@ -84,20 +101,78 @@ class DeliveryOrder {
   final double lineTotal;
   final String? note;
   final PaymentMethod paymentMethod;
-  final String paymentStatus;
+  final PaymentStatus paymentStatus;
   final OrderStatus status;
   final String? supervisorId;
+  final String? supervisorName;
   final String? riderId;
   final String? riderName;
   final String? estimatedArrivalAt;
   final String? supervisorNotifiedAt;
   final String? assignedAt;
+  final String? outForDeliveryAt;
   final String? riderArrivedAt;
   final String? deliveredAt;
+  final String? failedAt;
+  final String? failureReason;
+  final String? adminNotes;
+  final String? adminActionById;
+  final String? adminActionByName;
   final String? createdAt;
   final String? updatedAt;
   final String? deliveryAddress;
   final GeoLocation? deliveryLocation;
+
+  bool get isUnpaidCredit =>
+      paymentMethod == PaymentMethod.credit && paymentStatus.isUnpaid;
+
+  /// COD is collected on delivery; credit stays pending until marked paid.
+  PaymentStatus get effectivePaymentStatus {
+    if (paymentMethod == PaymentMethod.cod &&
+        status == OrderStatus.delivered) {
+      return PaymentStatus.paid;
+    }
+    return paymentStatus;
+  }
+
+  DateTime? get createdAtDate => _parse(createdAt);
+  DateTime? get assignedAtDate => _parse(assignedAt);
+  DateTime? get outForDeliveryAtDate => _parse(outForDeliveryAt);
+  DateTime? get riderArrivedAtDate => _parse(riderArrivedAt);
+  DateTime? get deliveredAtDate => _parse(deliveredAt);
+  DateTime? get failedAtDate => _parse(failedAt);
+
+  /// Time from order placed until supervisor assigned a rider.
+  Duration? get supervisorAssignDuration {
+    final start = createdAtDate;
+    final end = assignedAtDate;
+    if (start == null || end == null) return null;
+    return end.difference(start);
+  }
+
+  /// Time from rider assigned until delivery confirmed.
+  Duration? get riderDeliveryDuration {
+    final start = assignedAtDate;
+    final end = deliveredAtDate ?? failedAtDate;
+    if (start == null || end == null) return null;
+    return end.difference(start);
+  }
+
+  /// Time from rider arrived until customer confirmed delivery.
+  Duration? get customerConfirmDuration {
+    final start = riderArrivedAtDate;
+    final end = deliveredAtDate;
+    if (start == null || end == null) return null;
+    return end.difference(start);
+  }
+
+  /// Total lifecycle time until delivered or failed.
+  Duration? get totalOrderDuration {
+    final start = createdAtDate;
+    final end = deliveredAtDate ?? failedAtDate;
+    if (start == null || end == null) return null;
+    return end.difference(start);
+  }
 
   Map<String, dynamic> toJson() => {
         'customerId': customerId,
@@ -112,16 +187,23 @@ class DeliveryOrder {
         'lineTotal': lineTotal,
         'note': note,
         'paymentMethod': paymentMethod.name,
-        'paymentStatus': paymentStatus,
+        'paymentStatus': paymentStatus.name,
         'status': status.name,
         'supervisorId': supervisorId,
+        'supervisorName': supervisorName,
         'riderId': riderId,
         'riderName': riderName,
         'estimatedArrivalAt': estimatedArrivalAt,
         'supervisorNotifiedAt': supervisorNotifiedAt,
         'assignedAt': assignedAt,
+        'outForDeliveryAt': outForDeliveryAt,
         'riderArrivedAt': riderArrivedAt,
         'deliveredAt': deliveredAt,
+        'failedAt': failedAt,
+        'failureReason': failureReason,
+        'adminNotes': adminNotes,
+        'adminActionById': adminActionById,
+        'adminActionByName': adminActionByName,
         'deliveryAddress': deliveryAddress,
         if (deliveryLocation != null)
           'deliveryLocation': deliveryLocation!.toJson(),
@@ -130,10 +212,22 @@ class DeliveryOrder {
   DeliveryOrder copyWith({
     String? id,
     OrderStatus? status,
+    PaymentStatus? paymentStatus,
+    String? supervisorId,
+    String? supervisorName,
     String? riderId,
     String? riderName,
     String? estimatedArrivalAt,
+    String? supervisorNotifiedAt,
+    String? assignedAt,
+    String? outForDeliveryAt,
+    String? riderArrivedAt,
     String? deliveredAt,
+    String? failedAt,
+    String? failureReason,
+    String? adminNotes,
+    String? adminActionById,
+    String? adminActionByName,
     String? updatedAt,
   }) {
     return DeliveryOrder(
@@ -150,20 +244,49 @@ class DeliveryOrder {
       lineTotal: lineTotal,
       note: note,
       paymentMethod: paymentMethod,
-      paymentStatus: paymentStatus,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
       status: status ?? this.status,
-      supervisorId: supervisorId,
+      supervisorId: supervisorId ?? this.supervisorId,
+      supervisorName: supervisorName ?? this.supervisorName,
       riderId: riderId ?? this.riderId,
       riderName: riderName ?? this.riderName,
       estimatedArrivalAt: estimatedArrivalAt ?? this.estimatedArrivalAt,
-      supervisorNotifiedAt: supervisorNotifiedAt,
-      assignedAt: assignedAt,
-      riderArrivedAt: riderArrivedAt,
+      supervisorNotifiedAt:
+          supervisorNotifiedAt ?? this.supervisorNotifiedAt,
+      assignedAt: assignedAt ?? this.assignedAt,
+      outForDeliveryAt: outForDeliveryAt ?? this.outForDeliveryAt,
+      riderArrivedAt: riderArrivedAt ?? this.riderArrivedAt,
       deliveredAt: deliveredAt ?? this.deliveredAt,
+      failedAt: failedAt ?? this.failedAt,
+      failureReason: failureReason ?? this.failureReason,
+      adminNotes: adminNotes ?? this.adminNotes,
+      adminActionById: adminActionById ?? this.adminActionById,
+      adminActionByName: adminActionByName ?? this.adminActionByName,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deliveryAddress: deliveryAddress,
       deliveryLocation: deliveryLocation,
     );
+  }
+
+  static DateTime? _parse(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
+  }
+}
+
+extension DurationFormat on Duration {
+  String get shortLabel {
+    final totalMinutes = inMinutes.abs();
+    if (totalMinutes < 1) return '< 1m';
+    if (totalMinutes < 60) return '${totalMinutes}m';
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    if (hours < 24) {
+      return minutes == 0 ? '${hours}h' : '${hours}h ${minutes}m';
+    }
+    final days = hours ~/ 24;
+    final remHours = hours % 24;
+    return remHours == 0 ? '${days}d' : '${days}d ${remHours}h';
   }
 }

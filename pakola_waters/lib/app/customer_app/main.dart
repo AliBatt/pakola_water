@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:firebase/firebase.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:provider/provider.dart';
@@ -25,9 +26,12 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   final providers = await AppProviders.create();
   final authProvider = providers.authProvider;
   final router = createAppRouter(config: config, authProvider: authProvider);
+  providers.pushController.attachRouter(router);
 
   runApp(
     MultiProvider(

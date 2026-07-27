@@ -7,7 +7,38 @@ abstract class OrderService {
   Future<Result<DeliveryOrder>> createOrder(DeliveryOrder order);
   Stream<List<DeliveryOrder>> watchCustomerOrders(String customerId);
   Stream<DeliveryOrder?> watchActiveOrder(String customerId);
+  Stream<List<DeliveryOrder>> watchBranchOrders(String branchId);
+  Stream<List<DeliveryOrder>> watchAllOrders();
+  Stream<List<DeliveryOrder>> watchRiderOrders(String riderId);
   Future<Result<void>> confirmDelivery(String orderId);
+  Future<Result<void>> assignToRider({
+    required String orderId,
+    required String supervisorId,
+    required String supervisorName,
+    required String riderId,
+    required String riderName,
+    required DateTime estimatedArrivalAt,
+  });
+  Future<Result<void>> adminMarkDelivered({
+    required String orderId,
+    required String adminId,
+    required String adminName,
+    String? adminNotes,
+  });
+  Future<Result<void>> adminMarkFailed({
+    required String orderId,
+    required String adminId,
+    required String adminName,
+    required String failureReason,
+    String? adminNotes,
+  });
+  Future<Result<void>> adminUpdateNotes({
+    required String orderId,
+    required String adminNotes,
+  });
+  Future<Result<void>> markOutForDelivery(String orderId);
+  Future<Result<void>> markRiderArrived(String orderId);
+  Future<Result<void>> markPaymentPaid(String orderId);
   Future<Result<bool>> hasActiveOrder(String customerId);
 }
 
@@ -36,8 +67,10 @@ class OrderServiceImpl implements OrderService {
       'estimatedArrivalAt',
       'supervisorNotifiedAt',
       'assignedAt',
+      'outForDeliveryAt',
       'riderArrivedAt',
       'deliveredAt',
+      'failedAt',
     ]) {
       final value = data[key];
       if (value is Timestamp) {
@@ -62,7 +95,7 @@ class OrderServiceImpl implements OrderService {
         ..['createdAt'] = FieldValue.serverTimestamp()
         ..['updatedAt'] = FieldValue.serverTimestamp()
         ..['status'] = OrderStatus.pending.name
-        ..['paymentStatus'] = 'pending'
+        ..['paymentStatus'] = PaymentStatus.pending.name
         ..['createdBy'] = order.customerId;
 
       await docRef.set(data);
@@ -113,6 +146,244 @@ class OrderServiceImpl implements OrderService {
   }
 
   @override
+  Stream<List<DeliveryOrder>> watchBranchOrders(String branchId) {
+    return _firestoreService
+        .watchWhereOrderBy(
+          CollectionPaths.orders,
+          field: 'branchId',
+          isEqualTo: branchId,
+          orderBy: 'createdAt',
+        )
+        .map((snapshot) => snapshot.docs.map(_mapDoc).toList());
+  }
+
+  @override
+  Stream<List<DeliveryOrder>> watchAllOrders() {
+    return _firestoreService
+        .watchCollectionOrderBy(
+          CollectionPaths.orders,
+          orderBy: 'createdAt',
+        )
+        .map((snapshot) => snapshot.docs.map(_mapDoc).toList());
+  }
+
+  @override
+  Stream<List<DeliveryOrder>> watchRiderOrders(String riderId) {
+    return _firestoreService
+        .watchWhereOrderBy(
+          CollectionPaths.orders,
+          field: 'riderId',
+          isEqualTo: riderId,
+          orderBy: 'createdAt',
+        )
+        .map((snapshot) => snapshot.docs.map(_mapDoc).toList());
+  }
+
+  @override
+  Future<Result<void>> markOutForDelivery(String orderId) async {
+    try {
+      final snapshot =
+          await _firestoreService.doc(CollectionPaths.orders, orderId).get();
+      if (!snapshot.exists) {
+        return const FailureResult(ServerFailure('Order not found'));
+      }
+      final status = snapshot.data()?['status'] as String?;
+      if (status != OrderStatus.assigned.name) {
+        return const FailureResult(
+          ServerFailure('Order must be assigned before going out for delivery'),
+        );
+      }
+
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'status': OrderStatus.outForDelivery.name,
+          'outForDeliveryAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> markRiderArrived(String orderId) async {
+    try {
+      final snapshot =
+          await _firestoreService.doc(CollectionPaths.orders, orderId).get();
+      if (!snapshot.exists) {
+        return const FailureResult(ServerFailure('Order not found'));
+      }
+      final status = snapshot.data()?['status'] as String?;
+      if (status != OrderStatus.outForDelivery.name) {
+        return const FailureResult(
+          ServerFailure('Order must be out for delivery first'),
+        );
+      }
+
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'status': OrderStatus.riderArrived.name,
+          'riderArrivedAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> assignToRider({
+    required String orderId,
+    required String supervisorId,
+    required String supervisorName,
+    required String riderId,
+    required String riderName,
+    required DateTime estimatedArrivalAt,
+  }) async {
+    try {
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'supervisorId': supervisorId,
+          'supervisorName': supervisorName,
+          'riderId': riderId,
+          'riderName': riderName,
+          'status': OrderStatus.assigned.name,
+          'supervisorNotifiedAt': FieldValue.serverTimestamp(),
+          'assignedAt': FieldValue.serverTimestamp(),
+          'estimatedArrivalAt': Timestamp.fromDate(estimatedArrivalAt),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> adminMarkDelivered({
+    required String orderId,
+    required String adminId,
+    required String adminName,
+    String? adminNotes,
+  }) async {
+    try {
+      final snapshot =
+          await _firestoreService.doc(CollectionPaths.orders, orderId).get();
+      if (!snapshot.exists) {
+        return const FailureResult(ServerFailure('Order not found'));
+      }
+      final status = snapshot.data()?['status'] as String? ?? '';
+      if (_terminalStatuses.contains(status)) {
+        return const FailureResult(
+          ServerFailure('Order is already closed'),
+        );
+      }
+
+      final notes = adminNotes?.trim();
+      final paymentMethod = PaymentMethod.fromString(
+        snapshot.data()?['paymentMethod'] as String? ?? 'cod',
+      );
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'status': OrderStatus.delivered.name,
+          'deliveredAt': FieldValue.serverTimestamp(),
+          // COD is collected on delivery; credit stays unpaid until settled.
+          if (paymentMethod == PaymentMethod.cod)
+            'paymentStatus': PaymentStatus.paid.name,
+          'adminActionById': adminId,
+          'adminActionByName': adminName,
+          if (notes != null && notes.isNotEmpty) 'adminNotes': notes,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> adminMarkFailed({
+    required String orderId,
+    required String adminId,
+    required String adminName,
+    required String failureReason,
+    String? adminNotes,
+  }) async {
+    try {
+      final reason = failureReason.trim();
+      if (reason.isEmpty) {
+        return const FailureResult(
+          ServerFailure('Failure reason is required'),
+        );
+      }
+
+      final snapshot =
+          await _firestoreService.doc(CollectionPaths.orders, orderId).get();
+      if (!snapshot.exists) {
+        return const FailureResult(ServerFailure('Order not found'));
+      }
+      final status = snapshot.data()?['status'] as String? ?? '';
+      if (_terminalStatuses.contains(status)) {
+        return const FailureResult(
+          ServerFailure('Order is already closed'),
+        );
+      }
+
+      final notes = adminNotes?.trim();
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'status': OrderStatus.failed.name,
+          'failedAt': FieldValue.serverTimestamp(),
+          'failureReason': reason,
+          'adminActionById': adminId,
+          'adminActionByName': adminName,
+          if (notes != null && notes.isNotEmpty) 'adminNotes': notes,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> adminUpdateNotes({
+    required String orderId,
+    required String adminNotes,
+  }) async {
+    try {
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'adminNotes': adminNotes.trim(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
   Future<Result<void>> confirmDelivery(String orderId) async {
     try {
       final snapshot =
@@ -127,12 +398,41 @@ class OrderServiceImpl implements OrderService {
         );
       }
 
+      final paymentMethod = PaymentMethod.fromString(
+        snapshot.data()?['paymentMethod'] as String? ?? 'cod',
+      );
+
       await _firestoreService.updateDoc(
         CollectionPaths.orders,
         orderId,
         {
           'status': OrderStatus.delivered.name,
           'deliveredAt': FieldValue.serverTimestamp(),
+          if (paymentMethod == PaymentMethod.cod)
+            'paymentStatus': PaymentStatus.paid.name,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> markPaymentPaid(String orderId) async {
+    try {
+      final snapshot =
+          await _firestoreService.doc(CollectionPaths.orders, orderId).get();
+      if (!snapshot.exists) {
+        return const FailureResult(ServerFailure('Order not found'));
+      }
+
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'paymentStatus': PaymentStatus.paid.name,
           'updatedAt': FieldValue.serverTimestamp(),
         },
       );

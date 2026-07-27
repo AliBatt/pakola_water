@@ -55,14 +55,35 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 ),
               ),
             Expanded(
-              child: productsController.isLoading
-                  ? const LoadingView()
-                  : productsController.products.isEmpty
-                      ? EmptyStateView(
-                          title: l10n.noProducts,
-                          subtitle: l10n.noProductsSubtitle,
-                        )
-                      : ListView.separated(
+              child: RefreshIndicator(
+                onRefresh: productsController.load,
+                child: productsController.isLoading &&
+                        productsController.products.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(
+                            height: 240,
+                            child: LoadingView(),
+                          ),
+                        ],
+                      )
+                    : productsController.products.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.sizeOf(context).height * 0.45,
+                                child: EmptyStateView(
+                                  title: l10n.noProducts,
+                                  subtitle: l10n.noProductsSubtitle,
+                                ),
+                              ),
+                            ],
+                          )
+                        : ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           itemCount: productsController.products.length,
                           separatorBuilder: (_, _) =>
                               const SizedBox(height: AppSpacing.sm),
@@ -124,6 +145,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             );
                           },
                         ),
+              ),
             ),
           ],
         ),

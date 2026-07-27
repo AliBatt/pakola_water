@@ -20,6 +20,19 @@ enum OrderStatus {
       this != OrderStatus.cancelled &&
       this != OrderStatus.failed;
 
+  bool get isRequested =>
+      this == OrderStatus.pending || this == OrderStatus.supervisorNotified;
+
+  bool get isCompleted =>
+      this == OrderStatus.delivered ||
+      this == OrderStatus.cancelled ||
+      this == OrderStatus.failed;
+
+  bool get isInProgress =>
+      this == OrderStatus.assigned ||
+      this == OrderStatus.outForDelivery ||
+      this == OrderStatus.riderArrived;
+
   String get label {
     switch (this) {
       case OrderStatus.pending:

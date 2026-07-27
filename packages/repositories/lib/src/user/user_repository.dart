@@ -31,6 +31,14 @@ abstract class UserRepository {
   });
   Future<Result<AppUser>> updateUser(AppUser user);
   Future<Result<void>> deleteUser(String userId);
+  Future<Result<void>> registerFcmToken({
+    required String userId,
+    required String token,
+  });
+  Future<Result<void>> unregisterFcmToken({
+    required String userId,
+    required String token,
+  });
 }
 
 class UserRepositoryImpl implements UserRepository {
@@ -110,5 +118,21 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<Result<void>> deleteUser(String userId) {
     return _userService.deleteUserProfile(userId);
+  }
+
+  @override
+  Future<Result<void>> registerFcmToken({
+    required String userId,
+    required String token,
+  }) {
+    return _userService.registerFcmToken(userId: userId, token: token);
+  }
+
+  @override
+  Future<Result<void>> unregisterFcmToken({
+    required String userId,
+    required String token,
+  }) {
+    return _userService.unregisterFcmToken(userId: userId, token: token);
   }
 }

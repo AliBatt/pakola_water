@@ -72,4 +72,22 @@ class FirestoreService {
         .orderBy(orderBy, descending: descending)
         .snapshots();
   }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> watchCollectionOrderBy(
+    String path, {
+    required String orderBy,
+    bool descending = true,
+  }) {
+    return collection(path)
+        .orderBy(orderBy, descending: descending)
+        .snapshots();
+  }
+
+  CollectionReference<Map<String, dynamic>> subcollection(
+    String parentPath,
+    String parentId,
+    String subPath,
+  ) {
+    return doc(parentPath, parentId).collection(subPath);
+  }
 }

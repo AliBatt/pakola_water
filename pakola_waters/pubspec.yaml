@@ -41,9 +41,15 @@ dependencies:
     path: ../packages/services
   shared_widgets:
     path: ../packages/shared_widgets
+  utilities:
+    path: ../packages/utilities
   uuid: ^4.5.1
   geolocator: ^14.0.1
   shared_preferences: ^2.5.3
+  fl_chart: ^1.2.0
+  flutter_local_notifications: ^20.1.0
+  firebase_messaging: ^15.2.10
+  permission_handler: ^12.0.3
 
 dev_dependencies:
   flutter_lints: ^6.0.0

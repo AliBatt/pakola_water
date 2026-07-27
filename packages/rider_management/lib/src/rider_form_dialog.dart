@@ -153,22 +153,12 @@ class _RiderFormDialogState extends State<RiderFormDialog> {
     switch (result) {
       case Success<CreateUserAccountResult>(:final value):
         Navigator.of(context).pop();
-        await showDialog<void>(
+        await showCredentialsResultDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Rider created'),
-            content: Text(
-              'Login email: ${value.user.email}\n'
-              'Temporary password: ${value.temporaryPassword}'
-              '${value.generatedEmail ? '\n\n(Email was auto-generated from phone)' : ''}',
-            ),
-            actions: [
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Done'),
-              ),
-            ],
-          ),
+          title: 'Rider created',
+          email: value.user.email,
+          password: value.temporaryPassword,
+          generatedEmail: value.generatedEmail,
         );
       case FailureResult<CreateUserAccountResult>(:final failure):
         AppSnackBar.error(context, failure.message);

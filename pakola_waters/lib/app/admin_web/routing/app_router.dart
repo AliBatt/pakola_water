@@ -7,7 +7,10 @@ import '../config/app_config.dart';
 import '../features/branches/branches_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/notifications/admin_notifications_screen.dart';
+import '../features/orders/admin_orders_screen.dart';
+import '../features/payments/admin_payments_screen.dart';
 import '../features/products/products_screen.dart';
+import '../features/reports/admin_reports_screen.dart';
 import '../features/shell/admin_placeholder_page.dart';
 import '../features/shell/admin_shell.dart';
 import '../features/supervisors/supervisors_screen.dart';
@@ -92,18 +95,14 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: AdminRoutes.payments,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navPayments,
-              ),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdminPaymentsScreen(),
             ),
           ),
           GoRoute(
             path: AdminRoutes.reports,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navReports,
-              ),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdminReportsScreen(),
             ),
           ),
           GoRoute(
@@ -136,10 +135,8 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: AdminRoutes.orders,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navOrders,
-              ),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdminOrdersScreen(),
             ),
           ),
           GoRoute(

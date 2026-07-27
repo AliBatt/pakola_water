@@ -7,11 +7,17 @@ environment:
   sdk: ^3.7.0
 
 dependencies:
+  core:
+    path: ../core
   design_system:
     path: ../design_system
   flutter:
     sdk: flutter
   intl_phone_field: ^3.2.0
+  models:
+    path: ../models
+  utilities:
+    path: ../utilities
 
 dev_dependencies:
   flutter_lints: ^6.0.0

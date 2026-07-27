@@ -47,6 +47,14 @@ abstract class UserService {
   });
   Future<Result<AppUser>> updateUserProfile(AppUser user);
   Future<Result<void>> deleteUserProfile(String userId);
+  Future<Result<void>> registerFcmToken({
+    required String userId,
+    required String token,
+  });
+  Future<Result<void>> unregisterFcmToken({
+    required String userId,
+    required String token,
+  });
 }
 
 class UserServiceImpl implements UserService {
@@ -246,6 +254,56 @@ class UserServiceImpl implements UserService {
   Future<Result<void>> deleteUserProfile(String userId) async {
     try {
       await _firestoreService.deleteDoc(CollectionPaths.users, userId);
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> registerFcmToken({
+    required String userId,
+    required String token,
+  }) async {
+    final trimmed = token.trim();
+    if (trimmed.isEmpty) {
+      return const FailureResult(ServerFailure('FCM token is empty'));
+    }
+    try {
+      // Prefer merge set so the field is created even if missing.
+      await _firestoreService.setDoc(
+        CollectionPaths.users,
+        userId,
+        {
+          'fcmTokens': FieldValue.arrayUnion([trimmed]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        merge: true,
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> unregisterFcmToken({
+    required String userId,
+    required String token,
+  }) async {
+    final trimmed = token.trim();
+    if (trimmed.isEmpty) {
+      return const Success(null);
+    }
+    try {
+      await _firestoreService.updateDoc(
+        CollectionPaths.users,
+        userId,
+        {
+          'fcmTokens': FieldValue.arrayRemove([trimmed]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
       return const Success(null);
     } catch (error) {
       return FailureResult(ServerFailure(error.toString()));

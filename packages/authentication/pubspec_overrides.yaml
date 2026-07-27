@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: core,design_system,firebase,models,repositories,services,shared_widgets,utilities
+# melos_managed_dependency_overrides: core,design_system,firebase,models,repositories,services,shared_widgets,utilities,l10n
 dependency_overrides:
   core:
     path: ../core
@@ -6,6 +6,8 @@ dependency_overrides:
     path: ../design_system
   firebase:
     path: ../firebase
+  l10n:
+    path: ../l10n
   models:
     path: ../models
   repositories:

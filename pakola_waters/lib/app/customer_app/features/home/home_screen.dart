@@ -4,11 +4,11 @@ import 'package:core/core.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:l10n/l10n.dart';
 import 'package:models/models.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
+import 'package:utilities/utilities.dart';
 
 import '../../routing/customer_routes.dart';
 import '../notifications/notifications_bell_button.dart';
@@ -80,11 +80,33 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${diff.inMinutes}m';
   }
 
-  String _formatTs(String? value) {
-    if (value == null || value.isEmpty) return '—';
-    final dt = DateTime.tryParse(value);
-    if (dt == null) return value;
-    return DateFormat('dd MMM, hh:mm a').format(dt.toLocal());
+  Future<void> _onRefresh() {
+    return context.read<OrdersController>().refresh();
+  }
+
+  void _showOrderDetails(BuildContext context, DeliveryOrder order) {
+    final controller = context.read<OrdersController>();
+    showOrderDetailsSheet(
+      context: context,
+      order: order,
+      
+      messagesStream: controller.watchOrderMessages(order.id),
+      allowCustomerMessage: order.status.isActive,
+      allowReview: order.status == OrderStatus.delivered,
+      onSendMessage: (message, type) async {
+        final result = await controller.sendOrderMessage(
+          order: order,
+          message: message,
+          type: type,
+        );
+        switch (result) {
+          case Success():
+            return const Success(null);
+          case FailureResult(:final failure):
+            return FailureResult(failure);
+        }
+      },
+    );
   }
 
   @override
@@ -98,41 +120,48 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(l10n.navHome),
         actions: const [NotificationsBellButton()],
       ),
-      body: order == null
-          ? Center(
-              child: Padding(
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: order == null
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.local_shipping_outlined,
-                      size: 56,
-                      color: context.colors.onSurfaceVariant,
+                children: [
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.45,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.local_shipping_outlined,
+                          size: 56,
+                          color: context.colors.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          l10n.noOngoingOrder,
+                          style: context.texts.titleMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          l10n.noOngoingOrderSubtitle,
+                          textAlign: TextAlign.center,
+                          style: context.texts.bodyMedium?.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        FilledButton(
+                          onPressed: () => context.go(CustomerRoutes.products),
+                          child: Text(l10n.browseProducts),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      l10n.noOngoingOrder,
-                      style: context.texts.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      l10n.noOngoingOrderSubtitle,
-                      textAlign: TextAlign.center,
-                      style: context.texts.bodyMedium?.copyWith(
-                        color: context.colors.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    FilledButton(
-                      onPressed: () => context.go(CustomerRoutes.products),
-                      child: Text(l10n.browseProducts),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          : ListView(
+                  ),
+                ],
+              )
+            : ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
                 Text(
@@ -143,17 +172,27 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          order.productName,
-                          style: context.texts.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
+                  child: InkWell(
+                    onTap: () => _showOrderDetails(context, order),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  order.productName,
+                                  style: context.texts.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              Chip(label: Text(order.status.label)),
+                            ],
                           ),
-                        ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           'Qty ${order.quantity} · Rs ${order.lineTotal.toStringAsFixed(0)} · ${order.paymentMethod.label}',
@@ -169,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         _DetailRow(
                           label: 'Created',
-                          value: _formatTs(order.createdAt),
+                          value: DateTimeFormatter.format(order.createdAt),
                         ),
                         _DetailRow(
                           label: 'Time spent',
@@ -180,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           value: order.supervisorNotifiedAt != null ||
                                   order.status.index >=
                                       OrderStatus.supervisorNotified.index
-                              ? _formatTs(
+                              ? DateTimeFormatter.format(
                                   order.supervisorNotifiedAt ?? order.createdAt,
                                 )
                               : 'Waiting…',
@@ -198,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           label: 'ETA',
                           value: order.estimatedArrivalAt == null
                               ? 'Not set yet'
-                              : _formatTs(order.estimatedArrivalAt),
+                              : DateTimeFormatter.format(order.estimatedArrivalAt),
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         _StatusTimeline(order: order),
@@ -212,12 +251,22 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ],
+                        if (order.status.isActive) ...[
+                          const SizedBox(height: AppSpacing.lg),
+                          OutlinedButton.icon(
+                            onPressed: () => _showOrderDetails(context, order),
+                            icon: const Icon(Icons.message_outlined),
+                            label: const Text('Send message to supervisor'),
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 ),
+              ),
               ],
             ),
+      ),
     );
   }
 }

@@ -20,46 +20,85 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
+  final _searchController = TextEditingController();
 
-  List<AppUser> _customers = [];
-  String? _selectedCustomerId;
-  bool _loadingCustomers = true;
+  AppRole _role = AppRole.customer;
+  List<AppUser> _recipients = [];
+  List<AppUser> _filtered = [];
+  String? _selectedUserId;
+  bool _loading = true;
   bool _sending = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCustomers());
+    _searchController.addListener(_filterRecipients);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadRecipients());
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _bodyController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadCustomers() async {
+  Future<void> _loadRecipients() async {
+    setState(() {
+      _loading = true;
+      _selectedUserId = null;
+    });
+
     final result =
-        await context.read<UserRepository>().listByRole(AppRole.customer);
+        await context.read<UserRepository>().listByRole(_role);
     if (!mounted) return;
+
     switch (result) {
       case Success<List<AppUser>>(:final value):
         setState(() {
-          _customers = value
+          _recipients = value
             ..sort((a, b) => a.displayName.compareTo(b.displayName));
-          _loadingCustomers = false;
+          _filtered = _recipients;
+          _loading = false;
         });
+        _filterRecipients();
       case FailureResult<List<AppUser>>(:final failure):
-        setState(() => _loadingCustomers = false);
+        setState(() => _loading = false);
         AppSnackBar.error(context, failure.message);
+    }
+  }
+
+  void _filterRecipients() {
+    final query = _searchController.text.trim().toLowerCase();
+    setState(() {
+      _filtered = query.isEmpty
+          ? _recipients
+          : _recipients.where((user) {
+              return user.displayName.toLowerCase().contains(query) ||
+                  user.email.toLowerCase().contains(query) ||
+                  (user.phone ?? '').contains(query);
+            }).toList();
+    });
+  }
+
+  String _roleLabel(AppRole role) {
+    switch (role) {
+      case AppRole.customer:
+        return 'Customer';
+      case AppRole.supervisor:
+        return 'Supervisor';
+      case AppRole.driver:
+        return 'Rider';
+      case AppRole.admin:
+        return 'Admin';
     }
   }
 
   Future<void> _send() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedCustomerId == null) {
-      AppSnackBar.warning(context, context.l10n.selectCustomer);
+    if (_selectedUserId == null) {
+      AppSnackBar.warning(context, 'Select a recipient');
       return;
     }
 
@@ -67,17 +106,19 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
     if (sender == null) return;
 
     setState(() => _sending = true);
-    final result = await context.read<NotificationRepository>().createNotification(
-          AppNotification(
-            id: '',
-            userId: _selectedCustomerId!,
-            title: _titleController.text.trim(),
-            body: _bodyController.text.trim(),
-            createdById: sender.id,
-            createdByRole: sender.role.name,
-            createdByName: sender.displayName,
-          ),
-        );
+    final result =
+        await context.read<NotificationRepository>().createNotification(
+              AppNotification(
+                id: '',
+                userId: _selectedUserId!,
+                title: _titleController.text.trim(),
+                body: _bodyController.text.trim(),
+                createdById: sender.id,
+                createdByRole: sender.role.name,
+                createdByName: sender.displayName,
+                type: 'admin_message',
+              ),
+            );
     if (!mounted) return;
     setState(() => _sending = false);
 
@@ -109,37 +150,69 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Send a message to a customer. Supervisors and riders can also create notifications via the shared API.',
+              'Send a message to any customer, supervisor, or rider. They will see it in their notifications.',
               style: context.texts.bodyMedium?.copyWith(
                 color: context.colors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            if (_loadingCustomers)
+            SegmentedButton<AppRole>(
+              segments: const [
+                ButtonSegment(
+                  value: AppRole.customer,
+                  label: Text('Customers'),
+                  icon: Icon(Icons.person_outline),
+                ),
+                ButtonSegment(
+                  value: AppRole.supervisor,
+                  label: Text('Supervisors'),
+                  icon: Icon(Icons.supervisor_account_outlined),
+                ),
+                ButtonSegment(
+                  value: AppRole.driver,
+                  label: Text('Riders'),
+                  icon: Icon(Icons.delivery_dining_outlined),
+                ),
+              ],
+              selected: {_role},
+              onSelectionChanged: (selection) {
+                _role = selection.first;
+                _loadRecipients();
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (_loading)
               const Center(child: CircularProgressIndicator())
-            else
+            else ...[
+              AppTextField(
+                controller: _searchController,
+                labelText: 'Search ${_roleLabel(_role).toLowerCase()}',
+                prefix: const Icon(Icons.search),
+              ),
+              const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<String>(
-                initialValue: _selectedCustomerId,
-                decoration: InputDecoration(labelText: l10n.selectCustomer),
-                items: _customers
+                value: _selectedUserId,
+                decoration: InputDecoration(
+                  labelText: 'Select ${_roleLabel(_role).toLowerCase()}',
+                ),
+                items: _filtered
                     .map(
-                      (customer) => DropdownMenuItem(
-                        value: customer.id,
-                        child: Text(
-                          '${customer.displayName} (${customer.email})',
-                        ),
+                      (user) => DropdownMenuItem(
+                        value: user.id,
+                        child: Text('${user.displayName} (${user.email})'),
                       ),
                     )
                     .toList(),
                 onChanged: (value) =>
-                    setState(() => _selectedCustomerId = value),
+                    setState(() => _selectedUserId = value),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return l10n.selectCustomer;
+                    return 'Select a recipient';
                   }
                   return null;
                 },
               ),
+            ],
             const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: _titleController,
@@ -167,7 +240,7 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
             Align(
               alignment: Alignment.centerLeft,
               child: FilledButton.icon(
-                onPressed: _sending ? null : _send,
+                onPressed: _sending || _loading ? null : _send,
                 icon: _sending
                     ? const SizedBox(
                         width: 18,

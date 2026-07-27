@@ -9,11 +9,14 @@ class OrdersController extends ChangeNotifier {
   OrdersController({
     required OrderRepository orderRepository,
     required BranchRepository branchRepository,
+    required OrderMessageRepository orderMessageRepository,
   })  : _orderRepository = orderRepository,
-        _branchRepository = branchRepository;
+        _branchRepository = branchRepository,
+        _orderMessageRepository = orderMessageRepository;
 
   final OrderRepository _orderRepository;
   final BranchRepository _branchRepository;
+  final OrderMessageRepository _orderMessageRepository;
 
   AppUser? _user;
   DeliveryOrder? _activeOrder;
@@ -51,15 +54,29 @@ class OrdersController extends ChangeNotifier {
       return;
     }
 
+    _subscribeToOrders(user.id);
     _loadBranches();
-    _activeSub = _orderRepository.watchActiveOrder(user.id).listen((order) {
+  }
+
+  void _subscribeToOrders(String userId) {
+    _activeSub = _orderRepository.watchActiveOrder(userId).listen((order) {
       _activeOrder = order;
       notifyListeners();
     });
-    _ordersSub = _orderRepository.watchCustomerOrders(user.id).listen((orders) {
+    _ordersSub = _orderRepository.watchCustomerOrders(userId).listen((orders) {
       _orders = orders;
       notifyListeners();
     });
+  }
+
+  Future<void> refresh() async {
+    final userId = _user?.id;
+    if (userId == null) return;
+
+    _activeSub?.cancel();
+    _ordersSub?.cancel();
+    _subscribeToOrders(userId);
+    await _loadBranches();
   }
 
   Future<void> _loadBranches() async {
@@ -124,6 +141,27 @@ class OrdersController extends ChangeNotifier {
 
   Future<Result<void>> confirmDelivery(String orderId) {
     return _orderRepository.confirmDelivery(orderId);
+  }
+
+  Stream<List<OrderMessage>> watchOrderMessages(String orderId) {
+    return _orderMessageRepository.watchMessages(orderId);
+  }
+
+  Future<Result<OrderMessage>> sendOrderMessage({
+    required DeliveryOrder order,
+    required String message,
+    OrderMessageType type = OrderMessageType.customerMessage,
+  }) {
+    final user = _user;
+    if (user == null) {
+      return Future.value(const FailureResult(AuthFailure('Not signed in')));
+    }
+    return _orderMessageRepository.sendCustomerMessage(
+      order: order,
+      customer: user,
+      message: message,
+      type: type,
+    );
   }
 
   @override

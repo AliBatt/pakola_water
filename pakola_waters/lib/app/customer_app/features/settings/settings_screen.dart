@@ -5,6 +5,7 @@ import 'package:l10n/l10n.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
 
+import '../../../../shared/push/app_push_controller.dart';
 import '../notifications/notifications_bell_button.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -69,6 +70,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final localeController = context.watch<LocaleController>();
+    final push = context.watch<AppPushController>();
     final user = auth.user;
     final l10n = context.l10n;
 
@@ -101,6 +103,42 @@ class SettingsScreen extends StatelessWidget {
             ],
             const Divider(height: AppSpacing.xl),
           ],
+          ListTile(
+            leading: Icon(
+              push.permissionGranted && push.isRegistered
+                  ? Icons.notifications_active_outlined
+                  : Icons.notifications_off_outlined,
+            ),
+            title: const Text('Push notifications'),
+            subtitle: Text(
+              push.isRegistered
+                  ? 'Enabled · token ${push.tokenPreview}'
+                  : (push.lastError ??
+                      'Disabled — tap to allow notifications'),
+            ),
+            trailing: push.isRegistered
+                ? null
+                : TextButton(
+                    onPressed: () async {
+                      await context
+                          .read<AppPushController>()
+                          .ensureStarted(forcePermissionPrompt: true);
+                      if (!context.mounted) return;
+                      final current = context.read<AppPushController>();
+                      if (current.isRegistered) {
+                        AppSnackBar.success(context, 'Notifications enabled');
+                      } else {
+                        AppSnackBar.warning(
+                          context,
+                          current.lastError ??
+                              'Could not enable notifications',
+                        );
+                      }
+                    },
+                    child: const Text('Enable'),
+                  ),
+          ),
+          const Divider(height: AppSpacing.xl),
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(l10n.language),

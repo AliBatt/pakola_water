@@ -50,6 +50,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Pakola Waters needs your location to set your delivery address and recommend the nearest branch.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
