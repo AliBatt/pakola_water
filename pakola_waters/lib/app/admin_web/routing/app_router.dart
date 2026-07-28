@@ -5,12 +5,14 @@ import 'package:rider_management/rider_management.dart';
 
 import '../config/app_config.dart';
 import '../features/branches/branches_screen.dart';
+import '../features/customers/admin_customers_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/notifications/admin_notifications_screen.dart';
 import '../features/orders/admin_orders_screen.dart';
 import '../features/payments/admin_payments_screen.dart';
 import '../features/products/products_screen.dart';
 import '../features/reports/admin_reports_screen.dart';
+import '../features/settings/admin_settings_screen.dart';
 import '../features/shell/admin_placeholder_page.dart';
 import '../features/shell/admin_shell.dart';
 import '../features/supervisors/supervisors_screen.dart';
@@ -87,10 +89,8 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: AdminRoutes.customers,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navCustomers,
-              ),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdminCustomersScreen(),
             ),
           ),
           GoRoute(
@@ -141,10 +141,8 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: AdminRoutes.settings,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navSettings,
-              ),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdminSettingsScreen(),
             ),
           ),
         ],

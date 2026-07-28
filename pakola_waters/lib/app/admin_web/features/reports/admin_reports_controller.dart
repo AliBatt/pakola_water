@@ -374,17 +374,47 @@ class AdminReportsController extends ChangeNotifier {
     }
   }
 
+  String supervisorNameFor(DeliveryOrder order) {
+    final id = order.supervisorId;
+    if (id == null || id.isEmpty) {
+      return order.supervisorName?.trim().isNotEmpty == true
+          ? order.supervisorName!.trim()
+          : '';
+    }
+    return _resolveName(
+      denormalized: order.supervisorName,
+      id: id,
+      lookup: _supervisorNames,
+    );
+  }
+
+  String riderNameFor(DeliveryOrder order) {
+    final id = order.riderId;
+    if (id == null || id.isEmpty) {
+      return order.riderName?.trim().isNotEmpty == true
+          ? order.riderName!.trim()
+          : '';
+    }
+    return _resolveName(
+      denormalized: order.riderName,
+      id: id,
+      lookup: _riderNames,
+    );
+  }
+
   String _resolveName({
     required String? denormalized,
     required String id,
     required Map<String, String> lookup,
   }) {
-    if (denormalized != null && denormalized.trim().isNotEmpty) {
-      return denormalized.trim();
-    }
     final lookedUp = lookup[id];
     if (lookedUp != null && lookedUp.trim().isNotEmpty) {
       return lookedUp.trim();
+    }
+    if (denormalized != null &&
+        denormalized.trim().isNotEmpty &&
+        denormalized.trim() != id) {
+      return denormalized.trim();
     }
     return id;
   }

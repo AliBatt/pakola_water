@@ -28,12 +28,14 @@ class Product {
           (json['basePrice'] as num?)?.toDouble() ??
           0,
       specialOfferPrice: (json['specialOfferPrice'] as num?)?.toDouble(),
-      photoUrls: (json['photoUrls'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          (json['imageUrl'] != null
-              ? [json['imageUrl'] as String]
-              : const <String>[]),
+      photoUrls: ((json['photoUrls'] as List<dynamic>?)
+                  ?.map((e) => e.toString().trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList() ??
+              (json['imageUrl'] != null &&
+                      (json['imageUrl'] as String).trim().isNotEmpty
+                  ? [(json['imageUrl'] as String).trim()]
+                  : const <String>[])),
       category: ProductCategory.fromString(
         json['category'] as String? ?? 'other',
       ),

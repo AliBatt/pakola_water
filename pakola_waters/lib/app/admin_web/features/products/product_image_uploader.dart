@@ -1,9 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:firebase/firebase.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../../../shared/widgets/storage_network_image.dart';
 
 class ProductImageUploader {
   ProductImageUploader({
@@ -27,14 +28,21 @@ class ProductImageUploader {
 
   Future<Uint8List> compress(XFile file) async {
     final original = await file.readAsBytes();
-    final compressed = await FlutterImageCompress.compressWithList(
-      original,
-      quality: 70,
-      minWidth: 1280,
-      minHeight: 1280,
-      format: CompressFormat.jpeg,
-    );
-    return compressed.isEmpty ? original : Uint8List.fromList(compressed);
+    // flutter_image_compress is unreliable on web; keep originals there.
+    if (kIsWeb) return original;
+
+    try {
+      final compressed = await FlutterImageCompress.compressWithList(
+        original,
+        quality: 70,
+        minWidth: 1280,
+        minHeight: 1280,
+        format: CompressFormat.jpeg,
+      );
+      return compressed.isEmpty ? original : Uint8List.fromList(compressed);
+    } catch (_) {
+      return original;
+    }
   }
 
   Future<String> upload({
@@ -52,6 +60,7 @@ class ProductImageUploader {
   Future<void> deleteUrls(List<String> urls) async {
     for (final url in urls) {
       await _storageService.deleteByUrl(url);
+      StorageNetworkImage.clearCache(url);
     }
   }
 }

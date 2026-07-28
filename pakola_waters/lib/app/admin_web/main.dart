@@ -31,7 +31,10 @@ Future<void> main() async {
 
   runApp(
     MultiProvider(
-      providers: providers.providers,
+      providers: [
+        Provider<AppConfig>.value(value: config),
+        ...providers.providers,
+      ],
       child: AdminWebApp(config: config, router: router),
     ),
   );

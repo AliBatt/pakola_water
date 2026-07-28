@@ -17,12 +17,24 @@ class AdminOrdersScreen extends StatefulWidget {
 }
 
 class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
+  final _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AdminOrdersController>().bind();
+      final controller = context.read<AdminOrdersController>();
+      controller.bind();
+      if (controller.search.isNotEmpty) {
+        _searchController.text = controller.search;
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickCustomRange(AdminOrdersController controller) async {
@@ -62,6 +74,12 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<AdminOrdersController>();
     final orders = controller.filteredOrders;
+    if (_searchController.text != controller.search) {
+      _searchController.value = TextEditingValue(
+        text: controller.search,
+        selection: TextSelection.collapsed(offset: controller.search.length),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -113,6 +131,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(
+            controller: _searchController,
             labelText: 'Search customer, rider, supervisor, product, phone…',
             prefix: const Icon(Icons.search),
             onChanged: controller.setSearch,

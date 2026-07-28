@@ -29,7 +29,8 @@ class RidersController extends ChangeNotifier {
           user.displayName.toLowerCase().contains(query) ||
           (user.phone ?? '').contains(_search) ||
           user.email.toLowerCase().contains(query) ||
-          (user.cnic ?? '').contains(_search);
+          (user.cnic ?? '').contains(_search) ||
+          (user.vehiclePlate ?? '').toLowerCase().contains(query);
       final matchesStatus =
           _statusFilter == null || user.status == _statusFilter;
       final matchesBranch = _branchFilter == null ||

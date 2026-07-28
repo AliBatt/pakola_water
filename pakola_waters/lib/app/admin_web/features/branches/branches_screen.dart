@@ -24,32 +24,186 @@ class _BranchesScreenState extends State<BranchesScreen> {
     });
   }
 
+  void _showBranchDetails(
+    BuildContext context,
+    BranchesController controller,
+    Branch branch,
+  ) {
+    final supervisor = controller.supervisorFor(branch);
+    final location = branch.location == null
+        ? ''
+        : '${branch.location!.latitude.toStringAsFixed(5)}, '
+            '${branch.location!.longitude.toStringAsFixed(5)}';
+
+    showDetailsDialog(
+      context: context,
+      title: branch.name,
+      subtitle: 'Branch details',
+      fields: [
+        DetailField(
+          label: 'Branch code',
+          value: branch.code,
+          copyable: true,
+          monospace: true,
+          icon: Icons.tag,
+        ),
+        DetailField(
+          label: 'Supervisor',
+          value: supervisor?.displayName ?? '',
+          copyable: supervisor != null,
+          icon: Icons.person_outline,
+        ),
+        if (supervisor?.phone != null && supervisor!.phone!.isNotEmpty)
+          DetailField(
+            label: 'Supervisor phone',
+            value: supervisor.phone!,
+            copyable: true,
+            icon: Icons.phone_outlined,
+          ),
+        DetailField(
+          label: 'Address',
+          value: branch.address ?? '',
+          copyable: true,
+          icon: Icons.place_outlined,
+        ),
+        DetailField(
+          label: 'City',
+          value: branch.city ?? '',
+          copyable: true,
+          icon: Icons.location_city_outlined,
+        ),
+        DetailField(
+          label: 'Phone',
+          value: branch.phone ?? '',
+          copyable: true,
+          icon: Icons.call_outlined,
+        ),
+        DetailField(
+          label: 'Email',
+          value: branch.email ?? '',
+          copyable: true,
+          icon: Icons.email_outlined,
+        ),
+        DetailField(
+          label: 'Coordinates',
+          value: location,
+          copyable: true,
+          monospace: true,
+          icon: Icons.my_location_outlined,
+        ),
+        DetailField(
+          label: 'Riders assigned',
+          value: '${branch.riderIds.length}',
+          icon: Icons.two_wheeler_outlined,
+        ),
+        DetailField(
+          label: 'Status',
+          value: branch.status.name,
+          icon: Icons.flag_outlined,
+        ),
+        DetailField(
+          label: 'Branch ID',
+          value: branch.id,
+          copyable: true,
+          monospace: true,
+          icon: Icons.fingerprint,
+        ),
+        DetailField(
+          label: 'Notes',
+          value: branch.notes ?? '',
+          icon: Icons.notes_outlined,
+        ),
+      ],
+      onEdit: () => showBranchFormDialog(
+        context: context,
+        controller: controller,
+        branch: branch,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<BranchesController>();
+    final branches = controller.branches;
+    final activeCount =
+        branches.where((b) => b.status == BranchStatus.active).length;
 
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 820;
+
+        return Padding(
+          padding: EdgeInsets.all(compact ? AppSpacing.md : AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: AppTextField(
-                  labelText: 'Search branches',
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Branches',
+                          style: context.texts.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          'Manage locations, supervisors, and contact details.',
+                          style: context.texts.bodyMedium?.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Refresh',
+                    onPressed: controller.load,
+                    icon: const Icon(Icons.refresh),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  FilledButton.icon(
+                    onPressed: () => showBranchFormDialog(
+                      context: context,
+                      controller: controller,
+                    ),
+                    icon: const Icon(Icons.add),
+                    label: Text(compact ? 'Create' : 'Create branch'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  Chip(label: Text('Showing: ${branches.length}')),
+                  Chip(
+                    backgroundColor: AppColors.success.withValues(alpha: 0.12),
+                    label: Text('Active: $activeCount'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (compact) ...[
+                AppTextField(
+                  labelText: 'Search name, code, city…',
                   prefix: const Icon(Icons.search),
                   onChanged: controller.setSearch,
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              SizedBox(
-                width: 180,
-                child: DropdownButtonFormField<BranchStatus?>(
+                const SizedBox(height: AppSpacing.sm),
+                DropdownButtonFormField<BranchStatus?>(
                   value: controller.statusFilter,
-                  decoration: const InputDecoration(labelText: 'Status'),
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Status',
+                    isDense: true,
+                  ),
                   items: const [
-                    DropdownMenuItem(value: null, child: Text('All')),
+                    DropdownMenuItem(value: null, child: Text('All statuses')),
                     DropdownMenuItem(
                       value: BranchStatus.active,
                       child: Text('Active'),
@@ -61,147 +215,181 @@ class _BranchesScreenState extends State<BranchesScreen> {
                   ],
                   onChanged: controller.setStatusFilter,
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              FilledButton.icon(
-                onPressed: () => showBranchFormDialog(
-                  context: context,
-                  controller: controller,
+              ] else
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        labelText: 'Search name, code, city…',
+                        prefix: const Icon(Icons.search),
+                        onChanged: controller.setSearch,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    SizedBox(
+                      width: 200,
+                      child: DropdownButtonFormField<BranchStatus?>(
+                        value: controller.statusFilter,
+                        decoration: const InputDecoration(labelText: 'Status'),
+                        items: const [
+                          DropdownMenuItem(
+                            value: null,
+                            child: Text('All statuses'),
+                          ),
+                          DropdownMenuItem(
+                            value: BranchStatus.active,
+                            child: Text('Active'),
+                          ),
+                          DropdownMenuItem(
+                            value: BranchStatus.inactive,
+                            child: Text('Inactive'),
+                          ),
+                        ],
+                        onChanged: controller.setStatusFilter,
+                      ),
+                    ),
+                  ],
                 ),
-                icon: const Icon(Icons.add),
-                label: const Text('Create'),
+              if (controller.error != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  controller.error!,
+                  style: TextStyle(color: context.colors.error),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.md),
+              Expanded(
+                child: controller.isLoading
+                    ? const LoadingView(message: 'Loading branches...')
+                    : branches.isEmpty
+                        ? const EmptyStateView(
+                            title: 'No branches found',
+                            subtitle:
+                                'Create a branch and assign a supervisor to it.',
+                            icon: Icons.storefront_outlined,
+                          )
+                        : Card(
+                            clipBehavior: Clip.antiAlias,
+                            child: ListView.separated(
+                              itemCount: branches.length,
+                              separatorBuilder: (_, _) =>
+                                  const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final branch = branches[index];
+                                final supervisor =
+                                    controller.supervisorFor(branch);
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.md,
+                                    vertical: AppSpacing.xs,
+                                  ),
+                                  onTap: () => _showBranchDetails(
+                                    context,
+                                    controller,
+                                    branch,
+                                  ),
+                                  leading: CircleAvatar(
+                                    backgroundColor:
+                                        context.colors.primaryContainer,
+                                    child: Icon(
+                                      Icons.storefront_outlined,
+                                      color: context.colors.onPrimaryContainer,
+                                    ),
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          branch.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      StatusBadge(
+                                        status: branch.status.name,
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          [
+                                            'Code ${branch.code}',
+                                            if (supervisor != null)
+                                              supervisor.displayName
+                                            else
+                                              'No supervisor',
+                                            if (branch.city != null &&
+                                                branch.city!.isNotEmpty)
+                                              branch.city!,
+                                            '${branch.riderIds.length} riders',
+                                          ].join(' · '),
+                                        ),
+                                        if (branch.phone != null &&
+                                            branch.phone!.isNotEmpty)
+                                          Text(
+                                            branch.phone!,
+                                            style: context.texts.bodySmall
+                                                ?.copyWith(
+                                              color: context
+                                                  .colors.onSurfaceVariant,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  isThreeLine: true,
+                                  trailing: Wrap(
+                                    spacing: 0,
+                                    children: [
+                                      CopyValueButton(
+                                        value: branch.code,
+                                        label: 'branch code',
+                                        icon: Icons.tag,
+                                      ),
+                                      if (branch.phone != null)
+                                        CopyValueButton(
+                                          value: branch.phone!,
+                                          label: 'phone',
+                                          icon: Icons.call_outlined,
+                                        ),
+                                      IconButton(
+                                        tooltip: 'Edit',
+                                        onPressed: () => showBranchFormDialog(
+                                          context: context,
+                                          controller: controller,
+                                          branch: branch,
+                                        ),
+                                        icon: const Icon(Icons.edit_outlined),
+                                      ),
+                                      IconButton(
+                                        tooltip: 'Delete',
+                                        onPressed: () => _confirmDelete(
+                                          context,
+                                          controller,
+                                          branch,
+                                        ),
+                                        icon: Icon(
+                                          Icons.delete_outline,
+                                          color: context.colors.error,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          if (controller.error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Text(
-                controller.error!,
-                style: TextStyle(color: context.colors.error),
-              ),
-            ),
-          Expanded(
-            child: controller.isLoading
-                ? const LoadingView()
-                : controller.branches.isEmpty
-                    ? const EmptyStateView(
-                        title: 'No branches',
-                        subtitle:
-                            'Create a branch and assign a supervisor to it.',
-                      )
-                    : Card(
-                        clipBehavior: Clip.antiAlias,
-                        child: ListView.separated(
-                          itemCount: controller.branches.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final branch = controller.branches[index];
-                            final supervisor =
-                                controller.supervisorFor(branch);
-                            return ListTile(
-                              onTap: () => showDetailsDialog(
-                                context: context,
-                                title: branch.name,
-                                fields: [
-                                  DetailField(label: 'Code', value: branch.code),
-                                  DetailField(
-                                    label: 'Supervisor',
-                                    value: supervisor?.displayName ?? '',
-                                  ),
-                                  DetailField(
-                                    label: 'Address',
-                                    value: branch.address ?? '',
-                                  ),
-                                  DetailField(
-                                    label: 'City',
-                                    value: branch.city ?? '',
-                                  ),
-                                  DetailField(
-                                    label: 'Phone',
-                                    value: branch.phone ?? '',
-                                  ),
-                                  DetailField(
-                                    label: 'Email',
-                                    value: branch.email ?? '',
-                                  ),
-                                  DetailField(
-                                    label: 'Location',
-                                    value: branch.location == null
-                                        ? ''
-                                        : '${branch.location!.latitude.toStringAsFixed(5)}, ${branch.location!.longitude.toStringAsFixed(5)}',
-                                  ),
-                                  DetailField(
-                                    label: 'Riders',
-                                    value: '${branch.riderIds.length}',
-                                  ),
-                                  DetailField(
-                                    label: 'Status',
-                                    value: branch.status.name,
-                                  ),
-                                  DetailField(
-                                    label: 'Notes',
-                                    value: branch.notes ?? '',
-                                  ),
-                                ],
-                                onEdit: () => showBranchFormDialog(
-                                  context: context,
-                                  controller: controller,
-                                  branch: branch,
-                                ),
-                              ),
-                              leading: CircleAvatar(
-                                child: Icon(
-                                  Icons.store,
-                                  color: context.colors.onPrimaryContainer,
-                                ),
-                              ),
-                              title: Text('${branch.name} (${branch.code})'),
-                              subtitle: Text(
-                                [
-                                  if (supervisor != null)
-                                    'Supervisor: ${supervisor.displayName}'
-                                  else
-                                    'No supervisor',
-                                  if (branch.city != null) branch.city!,
-                                  '${branch.riderIds.length} riders',
-                                  branch.status.name,
-                                ].join(' · '),
-                              ),
-                              trailing: Wrap(
-                                spacing: 4,
-                                children: [
-                                  IconButton(
-                                    tooltip: 'Edit',
-                                    onPressed: () => showBranchFormDialog(
-                                      context: context,
-                                      controller: controller,
-                                      branch: branch,
-                                    ),
-                                    icon: const Icon(Icons.edit_outlined),
-                                  ),
-                                  IconButton(
-                                    tooltip: 'Delete',
-                                    onPressed: () => _confirmDelete(
-                                      context,
-                                      controller,
-                                      branch,
-                                    ),
-                                    icon: Icon(
-                                      Icons.delete_outline,
-                                      color: context.colors.error,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

@@ -61,6 +61,7 @@ class AdminOrdersController extends ChangeNotifier {
       if (query.isNotEmpty) {
         final haystack = [
           order.customerName,
+          order.customerId,
           order.customerPhone ?? '',
           order.riderName ?? '',
           order.supervisorName ?? supervisorNameFor(order),

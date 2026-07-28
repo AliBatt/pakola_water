@@ -8,6 +8,7 @@ import 'package:utilities/utilities.dart';
 
 import '../../../../shared/orders/others_date_preset.dart';
 import 'admin_reports_controller.dart';
+import 'admin_reports_exporter.dart';
 
 class AdminReportsScreen extends StatefulWidget {
   const AdminReportsScreen({super.key});
@@ -62,6 +63,42 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
 
   String _dur(Duration? value) => value?.shortLabel ?? '—';
 
+  Future<void> _exportReport(
+    AdminReportsController controller,
+    ReportExportFormat format,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            format == ReportExportFormat.pdf
+                ? 'Generating PDF report…'
+                : 'Generating CSV report…',
+          ),
+        ),
+      );
+      await AdminReportsExporter(controller).export(format);
+      if (!mounted) return;
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            format == ReportExportFormat.pdf
+                ? 'PDF report downloaded'
+                : 'CSV report downloaded',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not export report: $error')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<AdminReportsController>();
@@ -99,6 +136,40 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                 tooltip: 'Refresh',
                 onPressed: controller.refresh,
                 icon: const Icon(Icons.refresh),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              MenuAnchor(
+                builder: (context, menuController, child) {
+                  return FilledButton.icon(
+                    onPressed: () {
+                      if (menuController.isOpen) {
+                        menuController.close();
+                      } else {
+                        menuController.open();
+                      }
+                    },
+                    icon: const Icon(Icons.download),
+                    label: const Text('Download report'),
+                  );
+                },
+                menuChildren: [
+                  MenuItemButton(
+                    onPressed: () => _exportReport(
+                      controller,
+                      ReportExportFormat.pdf,
+                    ),
+                    leadingIcon: const Icon(Icons.picture_as_pdf_outlined),
+                    child: const Text('Download as PDF'),
+                  ),
+                  MenuItemButton(
+                    onPressed: () => _exportReport(
+                      controller,
+                      ReportExportFormat.csv,
+                    ),
+                    leadingIcon: const Icon(Icons.table_view_outlined),
+                    child: const Text('Download as CSV'),
+                  ),
+                ],
               ),
             ],
           ),

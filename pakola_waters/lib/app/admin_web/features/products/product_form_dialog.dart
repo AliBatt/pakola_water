@@ -7,6 +7,7 @@ import 'package:models/models.dart';
 import 'package:shared_widgets/shared_widgets.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../shared/widgets/storage_network_image.dart';
 import 'product_image_uploader.dart';
 import 'products_controller.dart';
 
@@ -382,8 +383,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                                               photo.bytes!,
                                               fit: BoxFit.cover,
                                             )
-                                          : Image.network(
-                                              photo.url!,
+                                          : StorageNetworkImage(
+                                              url: photo.url!,
+                                              width: 96,
+                                              height: 96,
                                               fit: BoxFit.cover,
                                             ),
                                     ),

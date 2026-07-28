@@ -4,6 +4,7 @@ import 'package:l10n/l10n.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
 
+import '../../../../shared/widgets/storage_network_image.dart';
 import '../notifications/notifications_bell_button.dart';
 import '../orders/orders_controller.dart';
 import '../orders/place_order_sheet.dart';
@@ -102,13 +103,16 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                           color: context.colors.primary,
                                         ),
                                       )
-                                    : ClipRRect(
+                                    : StorageNetworkImage(
+                                        url: product.photoUrls.first,
+                                        width: 48,
+                                        height: 48,
                                         borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          product.photoUrls.first,
-                                          width: 48,
-                                          height: 48,
-                                          fit: BoxFit.cover,
+                                        error: CircleAvatar(
+                                          child: Icon(
+                                            Icons.water_drop,
+                                            color: context.colors.primary,
+                                          ),
                                         ),
                                       ),
                                 title: Text(product.name),

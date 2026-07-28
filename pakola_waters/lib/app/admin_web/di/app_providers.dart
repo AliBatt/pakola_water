@@ -8,6 +8,7 @@ import 'package:rider_management/rider_management.dart';
 import 'package:services/services.dart';
 
 import '../features/branches/branches_controller.dart';
+import '../features/customers/admin_customers_controller.dart';
 import '../features/orders/admin_orders_controller.dart';
 import '../features/payments/admin_payments_controller.dart';
 import '../features/products/products_controller.dart';
@@ -116,6 +117,13 @@ class AppProviders {
           create: (_) => AdminPaymentsController(
             orderRepository: orderRepository,
             notificationRepository: notificationRepository,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdminCustomersController(
+            userRepository: userRepository,
+            branchRepository: branchRepository,
+            orderRepository: orderRepository,
           ),
         ),
       ],
