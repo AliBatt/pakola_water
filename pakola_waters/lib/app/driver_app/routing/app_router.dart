@@ -1,5 +1,6 @@
 import 'package:authentication/authentication.dart';
 import 'package:go_router/go_router.dart';
+import 'package:models/models.dart';
 
 import '../config/app_config.dart';
 import '../features/home/driver_home_screen.dart';
@@ -44,7 +45,9 @@ GoRouter createAppRouter({
     routes: [
       GoRoute(
         path: AuthRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) => const LoginScreen(
+          requiredRole: AppRole.driver,
+        ),
       ),
       GoRoute(
         path: DriverRoutes.notifications,

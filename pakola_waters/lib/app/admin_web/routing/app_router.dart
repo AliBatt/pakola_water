@@ -1,5 +1,6 @@
 import 'package:authentication/authentication.dart';
 import 'package:go_router/go_router.dart';
+import 'package:models/models.dart';
 import 'package:rider_management/rider_management.dart';
 
 import '../config/app_config.dart';
@@ -57,7 +58,9 @@ GoRouter createAppRouter({
     routes: [
       GoRoute(
         path: AuthRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) => const LoginScreen(
+          requiredRole: AppRole.admin,
+        ),
       ),
       ShellRoute(
         builder: (context, state, child) => AdminShell(child: child),

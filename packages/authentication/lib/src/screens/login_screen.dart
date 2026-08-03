@@ -1,6 +1,7 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:l10n/l10n.dart';
+import 'package:models/models.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
 
@@ -10,12 +11,16 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({
     super.key,
     this.onSignUp,
+    this.requiredRole,
   });
 
   static const String logoAsset = 'assets/images/logo.png';
 
   /// When set, shows a "Create an account" action (customer app).
   final VoidCallback? onSignUp;
+
+  /// When set, rejects sign-in if the user profile role does not match.
+  final AppRole? requiredRole;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -49,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await auth.signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text,
+      requiredRole: widget.requiredRole,
     );
 
     if (!mounted) return;

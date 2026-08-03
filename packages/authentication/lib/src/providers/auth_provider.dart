@@ -81,6 +81,7 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> signIn({
     required String email,
     required String password,
+    AppRole? requiredRole,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -91,19 +92,42 @@ class AuthProvider extends ChangeNotifier {
       password: password,
     );
 
-    return switch (result) {
-      Success<void>() => () {
-          _isLoading = false;
-          notifyListeners();
-          return true;
-        }(),
-      FailureResult<void>(:final failure) => () {
-          _errorMessage = failure.message;
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        }(),
-    };
+    switch (result) {
+      case FailureResult<void>(:final failure):
+        _errorMessage = failure.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      case Success<void>():
+        break;
+    }
+
+    await _loadUserProfile();
+
+    if (_user == null) {
+      _errorMessage =
+          'Account profile not found. Ask an admin to set up your user record.';
+      await _authRepository.signOut();
+      _status = AuthStatus.unauthenticated;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    if (requiredRole != null && _user!.role != requiredRole) {
+      _errorMessage =
+          'This account does not have access to this app (${_user!.role.name}).';
+      await _authRepository.signOut();
+      _user = null;
+      _status = AuthStatus.unauthenticated;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return true;
   }
 
   /// Creates Auth account + Firestore customer profile, then refreshes session.
