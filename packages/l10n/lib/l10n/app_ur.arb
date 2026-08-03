@@ -125,5 +125,245 @@
     }
   },
   "unread": "نئی",
-  "createAccount": "اکاؤنٹ بنائیں"
+  "createAccount": "اکاؤنٹ بنائیں",
+  "adminPanelSubtitle": "آپریشنز کنسول",
+  "adminConsoleLabel": "ایڈمن کنسول",
+  "adminRoleLabel": "ایڈمنسٹریٹر",
+  "myRequests": "میری درخواستیں",
+  "myRequestsSubtitle": "ایڈمن کو درخواست بھیجیں اور جوابات دیکھیں",
+  "newRequest": "نئی درخواست",
+  "newRequestSubtitle": "ایڈمن کو درخواست بھیجیں۔ ایک اختیاری تصویر منسلک کر سکتے ہیں۔",
+  "requestTitle": "عنوان",
+  "requestDescription": "تفصیل",
+  "addImageOptional": "تصویر شامل کریں (اختیاری)",
+  "removeImage": "تصویر ہٹائیں",
+  "sendRequest": "درخواست بھیجیں",
+  "requestSentToAdmin": "درخواست ایڈمن کو بھیج دی گئی",
+  "titleRequired": "عنوان ضروری ہے",
+  "descriptionRequired": "تفصیل ضروری ہے",
+  "searchYourRequests": "اپنی درخواستیں تلاش کریں…",
+  "searchRequestsAdmin": "نام، عنوان، کردار سے تلاش کریں…",
+  "allStatuses": "تمام حالتیں",
+  "noRequests": "کوئی درخواست نہیں",
+  "noRequestsSubtitle": "ایڈمن سے مدد کے لیے درخواست بنائیں۔",
+  "noRequestsAdminSubtitle": "گاہک، سپروائزر اور رائڈر کی درخواستیں یہاں دکھائی دیں گی۔",
+  "adminActions": "ایڈمن کارروائیاں",
+  "markInProgress": "جاری میں نشان زد کریں",
+  "completeAction": "مکمل",
+  "rejectAction": "مسترد",
+  "conversation": "گفتگو",
+  "noRepliesYet": "ابھی کوئی جواب نہیں۔ نیچے گفتگو شروع کریں۔",
+  "writeAReply": "جواب لکھیں",
+  "markedAsStatus": "{status} کے طور پر نشان زد",
+  "@markedAsStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "requestNoLongerAcceptsReplies": "یہ درخواست {status} ہے اور اب جواب قبول نہیں کرتی۔",
+  "@requestNoLongerAcceptsReplies": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "supportStatusOpen": "کھلی",
+  "supportStatusInProgress": "جاری",
+  "supportStatusCompleted": "مکمل",
+  "supportStatusRejected": "مسترد",
+  "supportStatusClosed": "بند",
+  "pushNotifications": "پش اطلاعات",
+  "pushEnabledWithToken": "فعال · ٹوکن {token}",
+  "@pushEnabledWithToken": {
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "pushDisabledHint": "غیر فعال — اطلاعات کی اجازت کے لیے تھپتھپائیں",
+  "enable": "فعال کریں",
+  "notificationsEnabled": "اطلاعات فعال ہو گئیں",
+  "couldNotEnableNotifications": "اطلاعات فعال نہیں ہو سکیں",
+  "orderType": "آرڈر کی قسم",
+  "orderTypeInstant": "فوری",
+  "orderTypeScheduled": "شیڈولڈ",
+  "instantOrderOngoingHint": "آپ کے پاس پہلے سے جاری فوری آرڈر ہے",
+  "instantOrderStartHint": "جتنی جلدی ممکن ہو ڈیلیوری شروع کریں",
+  "scheduledOrderExistingHint": "آپ کے پاس پہلے سے شیڈولڈ آرڈر ہے",
+  "scheduledOrderChooseHint": "بعد کی تاریخ اور وقت منتخب کریں",
+  "selectDateAndTime": "تاریخ اور وقت منتخب کریں",
+  "scheduledForLabel": "شیڈول: {when}",
+  "@scheduledForLabel": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryLocation": "ڈیلیوری مقام",
+  "mySavedAddress": "میرا محفوظ پتہ",
+  "noAddressOnProfile": "پروفائل پر کوئی پتہ نہیں",
+  "noAddressOnYourProfile": "آپ کے پروفائل پر کوئی پتہ نہیں",
+  "differentLocationForOrder": "اس آرڈر کے لیے مختلف مقام",
+  "searchAndPinCustom": "تلاش کریں اور حسبِ ضرورت مقام پن کریں",
+  "deliveringTo": "ڈیلیوری یہاں",
+  "selectedCustomLocation": "منتخب: {address} (حسبِ ضرورت مقام)",
+  "@selectedCustomLocation": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduledTimeMustBeFuture": "شیڈول وقت مستقبل میں ہونا چاہیے",
+  "deliveryAddressRequired": "ڈیلیوری پتہ ضروری ہے",
+  "deliveryLocationRequired": "ڈیلیوری مقام ضروری ہے",
+  "selectABranch": "برانچ منتخب کریں",
+  "selectScheduleDateTime": "شیڈول کی تاریخ اور وقت منتخب کریں",
+  "alreadyHaveInstantOrder": "آپ کے پاس پہلے سے جاری فوری آرڈر ہے",
+  "alreadyHaveScheduledOrder": "آپ کے پاس پہلے سے شیڈولڈ آرڈر ہے",
+  "orderProductTitle": "آرڈر {name}",
+  "@orderProductTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "upcomingScheduled": "آنے والا شیڈولڈ",
+  "searchAddress": "پتہ تلاش کریں",
+  "searchAddressHint": "مثلاً گلشنِ اقبال، کراچی",
+  "searchAddressHelp": "پتہ تلاش کریں، پھر نقشے پر پن ٹھیک کریں",
+  "clear": "صاف",
+  "branch": "برانچ",
+  "noActiveBranches": "کوئی فعال برانچ دستیاب نہیں",
+  "recommended": "تجویز کردہ",
+  "kmAway": "{km} کلومیٹر دور",
+  "@kmAway": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "tabRequested": "درخواست شدہ",
+  "tabScheduled": "شیڈولڈ",
+  "tabOthersWithCount": "دیگر ({count})",
+  "@tabOthersWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noRequestedOrders": "کوئی درخواست شدہ آرڈر نہیں",
+  "noRequestedOrdersSubtitle": "فوری اور واجب شیڈولڈ آرڈرز یہاں دکھائی دیتے ہیں۔",
+  "noScheduledOrders": "کوئی شیڈولڈ آرڈر نہیں",
+  "noScheduledOrdersSubtitle": "بعد کے لیے شیڈولڈ آرڈرز وقت آنے تک یہاں رہتے ہیں۔",
+  "waiting": "انتظار",
+  "qtyWithValue": "مقدار {quantity}",
+  "@qtyWithValue": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "assignOrder": "آرڈر تفویض کریں",
+  "scheduledOrderTitle": "شیڈولڈ آرڈر",
+  "customerWithName": "گاہک: {name}",
+  "@customerWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noteWithText": "نوٹ: {note}",
+  "@noteWithText": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduledAssignLockedHint": "یہ آرڈر شیڈولڈ ہے۔ آپ تفصیلات دیکھ سکتے ہیں، لیکن تفویض شیڈول وقت پر کھلے گی۔",
+  "selectRider": "رائڈر منتخب کریں",
+  "myBranch": "میری برانچ",
+  "otherBranches": "دیگر برانچز",
+  "noRidersInGroup": "اس گروپ میں کوئی رائڈر نہیں",
+  "estimatedArrival": "متوقع آمد",
+  "assignAndNotifyRider": "تفویض کریں اور رائڈر کو مطلع کریں",
+  "newlyAssigned": "نئے تفویض شدہ",
+  "noAssignedOrders": "کوئی تفویض شدہ آرڈر نہیں",
+  "noAssignedOrdersSubtitle": "سپروائزر کی نئی ڈیلیوریز یہاں دکھائی دیں گی۔",
+  "startDelivery": "ڈیلیوری شروع کریں",
+  "markArrived": "پہنچ گیا نشان زد کریں",
+  "viewAllActive": "تمام {count} فعال دیکھیں",
+  "@viewAllActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noOrdersMatchFilters": "فلٹرز سے کوئی آرڈر نہیں ملا",
+  "tryChangingSearchOrFilters": "تلاش یا فلٹرز تبدیل کر کے دیکھیں۔",
+  "status": "حالت",
+  "customer": "گاہک",
+  "qtyTotal": "مقدار / کل",
+  "placed": "دیا گیا",
+  "supervisorEta": "سپروائزر ETA",
+  "supervisor": "سپروائزر",
+  "note": "نوٹ",
+  "back": "واپس",
+  "statToday": "آج",
+  "statNewAssigned": "نئے تفویض",
+  "statNewRequests": "نئی درخواستیں",
+  "statInProgress": "جاری",
+  "statCompleted": "مکمل",
+  "statFailed": "ناکام",
+  "statPending": "زیرِ التوا",
+  "statTotalRange": "کل (رینج)",
+  "statRevenue": "آمدنی",
+  "vehicleWithPlate": "گاڑی: {plate}",
+  "@vehicleWithPlate": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "branchWithId": "برانچ: {id}",
+  "@branchWithId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "created": "بنایا گیا",
+  "timeSpent": "وقت صرف",
+  "supervisorNotified": "سپروائزر مطلع",
+  "rider": "رائڈر",
+  "eta": "ETA",
+  "sendMessageToSupervisor": "سپروائزر کو پیغام بھیجیں",
+  "searchCustomerOrPhone": "گاہک یا فون تلاش کریں",
+  "searchCustomerOrRider": "گاہک یا رائڈر تلاش کریں",
+  "orderDetails": "آرڈر کی تفصیلات",
+  "waitingCustomerConfirm": "گاہک کی ڈیلیوری تصدیق کا انتظار۔",
+  "view": "دیکھیں",
+  "newOrdersWaiting": "{count} نئے آرڈر منتظر",
+  "@newOrdersWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "openOrdersToAssignHint": "آرڈرز کھولیں → رائڈر تفویض کے لیے درخواست شدہ"
 }

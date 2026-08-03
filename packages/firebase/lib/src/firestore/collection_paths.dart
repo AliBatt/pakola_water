@@ -11,5 +11,6 @@ class CollectionPaths {
   static const String inventory = 'inventory';
   static const String payments = 'payments';
   static const String notifications = 'notifications';
+  static const String supportRequests = 'support_requests';
   static const String settings = 'settings';
 }

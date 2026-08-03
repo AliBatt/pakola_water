@@ -3,6 +3,7 @@ import 'package:core/core.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:l10n/l10n.dart';
 import 'package:models/models.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
@@ -36,6 +37,8 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
   final _noteController = TextEditingController();
   int _quantity = 1;
   PaymentMethod _paymentMethod = PaymentMethod.cod;
+  OrderType _orderType = OrderType.instant;
+  DateTime? _scheduledFor;
 
   /// false = signup / profile location; true = one-off for this order.
   bool _useCustomLocation = false;
@@ -60,6 +63,13 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
     _customAddress = user?.address?.trim();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = context.read<OrdersController>();
+      if (controller.hasOpenInstantOrder && !controller.hasOpenScheduledOrder) {
+        setState(() {
+          _orderType = OrderType.scheduled;
+          _scheduledFor ??= DateTime.now().add(const Duration(hours: 2));
+        });
+      }
       final location = _effectiveLocation;
       if (location != null) {
         _recommendNearest(
@@ -92,6 +102,15 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
       return _customAddress?.trim() ?? '';
     }
     return _profileAddress;
+  }
+
+  String _formatSchedule(DateTime value) {
+    final local = value.toLocal();
+    final date =
+        '${local.year}-${local.month.toString().padLeft(2, '0')}-${local.day.toString().padLeft(2, '0')}';
+    final time =
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+    return '$date $time';
   }
 
   void _recommendNearest(
@@ -143,23 +162,68 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
     }
   }
 
+  Future<void> _pickSchedule() async {
+    final now = DateTime.now();
+    final initial = _scheduledFor ?? now.add(const Duration(hours: 2));
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initial.isBefore(now) ? now : initial,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 30)),
+    );
+    if (date == null || !mounted) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+    );
+    if (time == null || !mounted) return;
+
+    final selected = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    if (!selected.isAfter(DateTime.now())) {
+      AppSnackBar.warning(context, context.l10n.scheduledTimeMustBeFuture);
+      return;
+    }
+    setState(() => _scheduledFor = selected);
+  }
+
   Future<void> _submit() async {
+    final l10n = context.l10n;
     final address = _effectiveAddress;
     final location = _effectiveLocation;
     if (address.isEmpty) {
-      AppSnackBar.warning(context, 'Delivery address is required');
+      AppSnackBar.warning(context, l10n.deliveryAddressRequired);
       return;
     }
     if (location == null) {
-      AppSnackBar.warning(context, 'Delivery location is required');
+      AppSnackBar.warning(context, l10n.deliveryLocationRequired);
       return;
     }
     if (_selectedBranchId == null || _selectedBranchId!.isEmpty) {
-      AppSnackBar.warning(context, 'Select a branch');
+      AppSnackBar.warning(context, l10n.selectABranch);
+      return;
+    }
+    if (_orderType == OrderType.scheduled && _scheduledFor == null) {
+      AppSnackBar.warning(context, l10n.selectScheduleDateTime);
       return;
     }
 
     final controller = context.read<OrdersController>();
+    if (_orderType == OrderType.instant && controller.hasOpenInstantOrder) {
+      AppSnackBar.warning(context, l10n.alreadyHaveInstantOrder);
+      return;
+    }
+    if (_orderType == OrderType.scheduled && controller.hasOpenScheduledOrder) {
+      AppSnackBar.warning(context, l10n.alreadyHaveScheduledOrder);
+      return;
+    }
+
     final result = await controller.placeOrder(
       product: widget.product,
       quantity: _quantity,
@@ -169,13 +233,20 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
       deliveryAddress: address,
       deliveryLocation: location,
       isCustomDeliveryLocation: _useCustomLocation,
+      orderType: _orderType,
+      scheduledFor: _orderType == OrderType.scheduled ? _scheduledFor : null,
     );
 
     if (!mounted) return;
     switch (result) {
       case Success():
         Navigator.pop(context);
-        AppSnackBar.success(context, 'Order placed');
+        AppSnackBar.success(
+          context,
+          _orderType == OrderType.scheduled
+              ? 'Order scheduled'
+              : 'Order placed',
+        );
         context.go(CustomerRoutes.home);
       case FailureResult(:final failure):
         AppSnackBar.error(context, failure.message);
@@ -184,6 +255,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final controller = context.watch<OrdersController>();
     final product = widget.product;
     final total = product.effectivePrice * _quantity;
@@ -209,7 +281,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
             Text(
-              'Order ${product.name}',
+              l10n.orderProductTitle(product.name),
               style: context.texts.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -222,9 +294,68 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
+            Text(
+              l10n.orderType,
+              style: context.texts.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            RadioListTile<OrderType>(
+              value: OrderType.instant,
+              groupValue: _orderType,
+              onChanged: controller.hasOpenInstantOrder
+                  ? null
+                  : (value) {
+                      if (value != null) {
+                        setState(() => _orderType = value);
+                      }
+                    },
+              title: Text(l10n.orderTypeInstant),
+              subtitle: Text(
+                controller.hasOpenInstantOrder
+                    ? l10n.instantOrderOngoingHint
+                    : l10n.instantOrderStartHint,
+              ),
+              contentPadding: EdgeInsets.zero,
+            ),
+            RadioListTile<OrderType>(
+              value: OrderType.scheduled,
+              groupValue: _orderType,
+              onChanged: controller.hasOpenScheduledOrder
+                  ? null
+                  : (value) {
+                      if (value != null) {
+                        setState(() {
+                          _orderType = value;
+                          _scheduledFor ??=
+                              DateTime.now().add(const Duration(hours: 2));
+                        });
+                      }
+                    },
+              title: Text(l10n.orderTypeScheduled),
+              subtitle: Text(
+                controller.hasOpenScheduledOrder
+                    ? l10n.scheduledOrderExistingHint
+                    : l10n.scheduledOrderChooseHint,
+              ),
+              contentPadding: EdgeInsets.zero,
+            ),
+            if (_orderType == OrderType.scheduled) ...[
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton.icon(
+                onPressed: _pickSchedule,
+                icon: const Icon(Icons.schedule),
+                label: Text(
+                  _scheduledFor == null
+                      ? l10n.selectDateAndTime
+                      : l10n.scheduledForLabel(_formatSchedule(_scheduledFor!)),
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                const Text('Quantity'),
+                Text(l10n.quantity),
                 const Spacer(),
                 IconButton(
                   onPressed: _quantity > 1
@@ -244,7 +375,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Delivery location',
+              l10n.deliveryLocation,
               style: context.texts.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -256,10 +387,10 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
               onChanged: (value) {
                 if (value != null) _setUseCustomLocation(value);
               },
-              title: const Text('My saved address'),
+              title: Text(l10n.mySavedAddress),
               subtitle: Text(
                 _profileAddress.isEmpty
-                    ? 'No address on profile'
+                    ? l10n.noAddressOnProfile
                     : _profileAddress,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -272,10 +403,8 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
               onChanged: (value) {
                 if (value != null) _setUseCustomLocation(value);
               },
-              title: const Text('Different location for this order'),
-              subtitle: const Text(
-                'Search and pin a custom delivery point',
-              ),
+              title: Text(l10n.differentLocationForOrder),
+              subtitle: Text(l10n.searchAndPinCustom),
               contentPadding: EdgeInsets.zero,
             ),
             if (!_useCustomLocation) ...[
@@ -301,7 +430,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
-                          'Delivering to',
+                          l10n.deliveringTo,
                           style: context.texts.labelLarge?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -311,7 +440,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
                     const SizedBox(height: AppSpacing.sm),
                     Text(
                       _profileAddress.isEmpty
-                          ? 'No address on your profile'
+                          ? l10n.noAddressOnYourProfile
                           : _profileAddress,
                       style: context.texts.bodyMedium,
                     ),
@@ -344,7 +473,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
               if (_customAddress != null && _customAddress!.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Selected: $_customAddress (custom location)',
+                  l10n.selectedCustomLocation(_customAddress!),
                   style: context.texts.bodySmall?.copyWith(
                     color: context.colors.onSurfaceVariant,
                   ),
@@ -353,7 +482,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
             ],
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Branch',
+              l10n.branch,
               style: context.texts.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -361,7 +490,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
             const SizedBox(height: AppSpacing.sm),
             if (branches.isEmpty)
               Text(
-                'No active branches available',
+                l10n.noActiveBranches,
                 style: TextStyle(color: context.colors.error),
               )
             else
@@ -394,7 +523,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            'Recommended',
+                            l10n.recommended,
                             style: context.texts.labelSmall?.copyWith(
                               color: context.colors.onPrimaryContainer,
                             ),
@@ -406,7 +535,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
                     [
                       if (branch.address != null) branch.address!,
                       if (distance != null)
-                        '${distance.toStringAsFixed(1)} km away',
+                        l10n.kmAway(distance.toStringAsFixed(1)),
                     ].where((e) => e.isNotEmpty).join(' · '),
                   ),
                   contentPadding: EdgeInsets.zero,
@@ -415,7 +544,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
             const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: _noteController,
-              labelText: 'Extra note (optional)',
+              labelText: l10n.extraNote,
               maxLines: 2,
             ),
             const SizedBox(height: AppSpacing.md),
@@ -459,7 +588,7 @@ class _PlaceOrderSheetState extends State<PlaceOrderSheet> {
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Place order'),
+                  : Text(l10n.placeOrder),
             ),
           ],
         ),

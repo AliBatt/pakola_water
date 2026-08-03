@@ -7,6 +7,8 @@ import 'package:utilities/utilities.dart';
 
 import '../../routing/driver_routes.dart';
 import '../orders/driver_orders_controller.dart';
+import '../../../../shared/requests/support_requests_app_bar_button.dart';
+import '../notifications/driver_notifications_bell_button.dart';
 
 class DriverHomeScreen extends StatelessWidget {
   const DriverHomeScreen({super.key});
@@ -49,7 +51,13 @@ class DriverHomeScreen extends StatelessWidget {
     final active = controller.assignedOrders;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.driverHomeTitle)),
+      appBar: AppBar(
+        leading: const SupportRequestsAppBarButton(
+          route: DriverRoutes.requests,
+        ),
+        title: Text(l10n.driverHomeTitle),
+        actions: const [DriverNotificationsBellButton()],
+      ),
       body: RefreshIndicator(
         onRefresh: controller.refresh,
         child: ListView(
@@ -109,7 +117,7 @@ class DriverHomeScreen extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: TextButton(
                     onPressed: () => context.go(DriverRoutes.orders),
-                    child: Text('View all ${active.length} active'),
+                    child: Text(l10n.viewAllActive(active.length)),
                   ),
                 ),
             ],
@@ -130,32 +138,32 @@ class DriverHomeScreen extends StatelessWidget {
               runSpacing: AppSpacing.md,
               children: [
                 _StatCard(
-                  label: 'Today',
+                  label: l10n.statToday,
                   value: '${controller.todayOrderCount}',
                   icon: Icons.today,
                 ),
                 _StatCard(
-                  label: 'New assigned',
+                  label: l10n.statNewAssigned,
                   value: '${controller.newAssignedCount}',
                   icon: Icons.inbox,
                 ),
                 _StatCard(
-                  label: 'In progress',
+                  label: l10n.statInProgress,
                   value: '${controller.statsInProgressOrders}',
                   icon: Icons.local_shipping_outlined,
                 ),
                 _StatCard(
-                  label: 'Completed',
+                  label: l10n.statCompleted,
                   value: '${controller.statsCompletedOrders}',
                   icon: Icons.check_circle_outline,
                 ),
                 _StatCard(
-                  label: 'Failed',
+                  label: l10n.statFailed,
                   value: '${controller.statsFailedOrders}',
                   icon: Icons.cancel_outlined,
                 ),
                 _StatCard(
-                  label: 'Total (range)',
+                  label: l10n.statTotalRange,
                   value: '${controller.statsTotalOrders}',
                   icon: Icons.receipt_long,
                 ),

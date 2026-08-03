@@ -13,7 +13,12 @@ class SupervisorPushRoutes {
       case 'order_cancelled':
       case 'order_message':
       case 'order_review':
+      case 'order_scheduled':
+      case 'order_scheduled_due':
         return SupervisorRoutes.orders;
+      case 'support_request_reply':
+      case 'support_request_status':
+        return SupervisorRoutes.requests;
       case 'admin_message':
       default:
         return SupervisorRoutes.notifications;

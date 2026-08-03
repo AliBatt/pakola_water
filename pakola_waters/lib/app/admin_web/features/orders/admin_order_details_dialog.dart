@@ -408,6 +408,12 @@ class _AdminOrderDetailsDialogState extends State<AdminOrderDetailsDialog> {
                             'Qty / Total',
                             '${current.quantity} · Rs ${current.lineTotal.toStringAsFixed(0)} · ${current.paymentMethod.label}',
                           ),
+                          _InfoRow('Type', current.orderType.label),
+                          if (current.scheduledFor != null)
+                            _InfoRow(
+                              'Scheduled for',
+                              DateTimeFormatter.formatLong(current.scheduledFor),
+                            ),
                           if (current.note != null && current.note!.isNotEmpty)
                             _InfoRow('Customer note', current.note!),
                           const SizedBox(height: AppSpacing.md),

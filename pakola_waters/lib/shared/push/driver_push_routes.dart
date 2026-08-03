@@ -14,6 +14,9 @@ class DriverPushRoutes {
       case 'order_review':
       case 'admin_message':
         return DriverRoutes.notifications;
+      case 'support_request_reply':
+      case 'support_request_status':
+        return DriverRoutes.requests;
       default:
         return DriverRoutes.home;
     }

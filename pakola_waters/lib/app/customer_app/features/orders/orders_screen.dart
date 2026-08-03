@@ -56,8 +56,11 @@ class OrdersScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          if (controller.hasActiveOrder) {
-            AppSnackBar.warning(context, l10n.activeOrderBlock);
+          if (!controller.canPlaceOrder) {
+            AppSnackBar.warning(
+              context,
+              'You already have an instant and a scheduled order',
+            );
             return;
           }
           context.go(CustomerRoutes.products);
@@ -94,17 +97,23 @@ class OrdersScreen extends StatelessWidget {
                     title: Text(order.productName),
                     subtitle: Text(
                       [
+                        order.orderType.label,
                         order.status.label,
+                        if (order.status.isScheduledHold &&
+                            order.scheduledFor != null)
+                          'For ${DateTimeFormatter.formatLong(order.scheduledFor)}',
                         'Qty ${order.quantity}',
                         'Rs ${order.lineTotal.toStringAsFixed(0)}',
                         DateTimeFormatter.formatLong(order.createdAt),
                       ].join(' · '),
                     ),
                     trailing: Icon(
-                      order.status.isActive
-                          ? Icons.timelapse
-                          : Icons.check_circle_outline,
-                      color: order.status.isActive
+                      order.status.isScheduledHold
+                          ? Icons.schedule
+                          : order.status.isActive
+                              ? Icons.timelapse
+                              : Icons.check_circle_outline,
+                      color: order.status.isScheduledHold || order.status.isActive
                           ? context.colors.primary
                           : context.colors.onSurfaceVariant,
                     ),

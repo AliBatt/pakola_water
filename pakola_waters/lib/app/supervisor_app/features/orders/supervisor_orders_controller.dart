@@ -48,6 +48,9 @@ class SupervisorOrdersController extends ChangeNotifier {
   List<DeliveryOrder> get requestedOrders =>
       _orders.where((o) => o.status.isRequested).toList();
 
+  List<DeliveryOrder> get scheduledOrders =>
+      _orders.where((o) => o.status.isScheduledHold).toList();
+
   String _othersSearch = '';
   OthersDatePreset _othersDatePreset = OthersDatePreset.all;
   DateTimeRange? _othersCustomRange;

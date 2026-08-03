@@ -6,6 +6,7 @@ class SupervisorRoutes {
   static const String riders = '/riders';
   static const String settings = '/settings';
   static const String notifications = '/notifications';
+  static const String requests = '/requests';
 
   static const List<String> shell = [home, orders, riders, settings];
 }

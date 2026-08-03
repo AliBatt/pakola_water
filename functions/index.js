@@ -5,6 +5,7 @@ const {
   onDocumentCreated,
   onDocumentUpdated,
 } = require("firebase-functions/v2/firestore");
+const {onSchedule} = require("firebase-functions/v2/scheduler");
 const {setGlobalOptions} = require("firebase-functions/v2");
 const {logger} = require("firebase-functions");
 
@@ -22,12 +23,18 @@ function routeForType(type) {
     case "staff_message":
     case "payment_reminder":
     case "order_created":
+    case "order_scheduled":
+    case "order_scheduled_due":
     case "order_delivered":
     case "order_failed":
     case "order_cancelled":
       return "/";
     case "order_review":
       return "/orders";
+    case "support_request_created":
+    case "support_request_reply":
+    case "support_request_status":
+      return "/requests";
     case "admin_message":
     default:
       return "/notifications";
@@ -40,6 +47,7 @@ async function createNotification({
   body,
   type,
   orderId,
+  requestId,
   createdById,
   createdByRole,
   createdByName,
@@ -51,12 +59,21 @@ async function createNotification({
     body,
     type,
     orderId: orderId || null,
+    requestId: requestId || null,
     createdById: createdById || "system",
     createdByRole: createdByRole || "system",
     createdByName: createdByName || "Pakola Waters",
     read: false,
     createdAt: FieldValue.serverTimestamp(),
   });
+}
+
+async function listAdmins() {
+  const snap = await getFirestore()
+      .collection("users")
+      .where("role", "==", "admin")
+      .get();
+  return snap.docs.map((doc) => ({id: doc.id, ...doc.data()}));
 }
 
 async function listBranchSupervisors(branchId) {
@@ -296,6 +313,8 @@ exports.onOrderCreated = onDocumentCreated(
       const customerName = order.customerName || "Customer";
       const qty = order.quantity || 1;
       const customerId = order.customerId || "system";
+      const status = order.status || "pending";
+      const orderType = order.orderType || "instant";
 
       const supervisors = await listBranchSupervisors(branchId);
       if (supervisors.length === 0) {
@@ -303,16 +322,192 @@ exports.onOrderCreated = onDocumentCreated(
         return;
       }
 
+      const isScheduled = status === "scheduled" || orderType === "scheduled";
+      let scheduledLabel = "";
+      if (isScheduled && order.scheduledFor && order.scheduledFor.toDate) {
+        scheduledLabel = ` for ${order.scheduledFor.toDate().toLocaleString()}`;
+      }
+
       for (const supervisor of supervisors) {
         await createNotification({
           userId: supervisor.id,
-          title: "New order requested",
-          body: `${customerName} ordered ${productName} x${qty}.`,
-          type: "order_created",
+          title: isScheduled ? "New scheduled order" : "New order requested",
+          body: isScheduled
+            ? `${customerName} scheduled ${productName} x${qty}${scheduledLabel}. Assignment unlocks at the scheduled time.`
+            : `${customerName} ordered ${productName} x${qty}.`,
+          type: isScheduled ? "order_scheduled" : "order_created",
           orderId,
           createdById: customerId,
           createdByRole: "customer",
           createdByName: customerName,
+        });
+      }
+    },
+);
+
+/**
+ * Activates due scheduled orders every minute:
+ * status scheduled → pending, then notifies branch supervisors (+ customer).
+ */
+exports.activateScheduledOrders = onSchedule(
+    {
+      schedule: "every 1 minutes",
+      timeZone: "Asia/Karachi",
+    },
+    async () => {
+      const db = getFirestore();
+      const now = new Date();
+      const snap = await db
+          .collection("orders")
+          .where("status", "==", "scheduled")
+          .where("scheduledFor", "<=", now)
+          .limit(50)
+          .get();
+
+      if (snap.empty) {
+        logger.info("No scheduled orders due");
+        return;
+      }
+
+      for (const doc of snap.docs) {
+        const order = doc.data() || {};
+        const orderId = doc.id;
+
+        try {
+          await doc.ref.update({
+            status: "pending",
+            scheduledActivatedAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        } catch (error) {
+          logger.error("Failed to activate scheduled order", {orderId, error});
+          continue;
+        }
+
+        const productName = order.productName || "Order";
+        const customerName = order.customerName || "Customer";
+        const qty = order.quantity || 1;
+        const branchId = order.branchId;
+        const customerId = order.customerId;
+
+        const supervisors = await listBranchSupervisors(branchId);
+        for (const supervisor of supervisors) {
+          await createNotification({
+            userId: supervisor.id,
+            title: "Scheduled order is ready",
+            body:
+                `${customerName}'s scheduled ${productName} x${qty} is now ready to assign.`,
+            type: "order_scheduled_due",
+            orderId,
+            createdById: "system",
+            createdByRole: "system",
+            createdByName: "Pakola Waters",
+          });
+        }
+
+        if (customerId) {
+          await createNotification({
+            userId: customerId,
+            title: "Scheduled order is active",
+            body:
+                `Your scheduled ${productName} x${qty} is now active and waiting for assignment.`,
+            type: "order_scheduled_due",
+            orderId,
+            createdById: "system",
+            createdByRole: "system",
+            createdByName: "Pakola Waters",
+          });
+        }
+
+        logger.info("Activated scheduled order", {orderId, branchId});
+      }
+    },
+);
+
+exports.onSupportRequestCreated = onDocumentCreated(
+    "support_requests/{requestId}",
+    async (event) => {
+      const snapshot = event.data;
+      if (!snapshot) return;
+      const request = snapshot.data() || {};
+      const requestId = event.params.requestId;
+      const title = request.title || "Support request";
+      const createdByName = request.createdByName || "User";
+      const createdByRole = request.createdByRole || "customer";
+      const createdById = request.createdById || "system";
+      const description = request.description || "";
+      const preview = description.length > 100
+        ? `${description.substring(0, 97)}...`
+        : description;
+
+      const admins = await listAdmins();
+      for (const admin of admins) {
+        await createNotification({
+          userId: admin.id,
+          title: "New support request",
+          body: `${createdByName} (${createdByRole}): ${title}` +
+              (preview ? ` — ${preview}` : ""),
+          type: "support_request_created",
+          requestId,
+          createdById,
+          createdByRole,
+          createdByName,
+        });
+      }
+    },
+);
+
+exports.onSupportReplyCreated = onDocumentCreated(
+    "support_requests/{requestId}/replies/{replyId}",
+    async (event) => {
+      const snapshot = event.data;
+      if (!snapshot) return;
+      const reply = snapshot.data() || {};
+      const requestId = event.params.requestId;
+      const message = reply.message || "";
+      const preview = message.length > 120
+        ? `${message.substring(0, 117)}...`
+        : message;
+      const createdById = reply.createdById || "system";
+      const createdByName = reply.createdByName || "User";
+      const createdByRole = reply.createdByRole || "customer";
+
+      const requestSnap = await getFirestore()
+          .collection("support_requests")
+          .doc(requestId)
+          .get();
+      if (!requestSnap.exists) return;
+      const request = requestSnap.data() || {};
+      const requestTitle = request.title || "Support request";
+      const requesterId = request.createdById;
+
+      if (createdByRole === "admin") {
+        if (!requesterId || requesterId === createdById) return;
+        await createNotification({
+          userId: requesterId,
+          title: "Reply on your request",
+          body: `${createdByName}: ${preview}`,
+          type: "support_request_reply",
+          requestId,
+          createdById,
+          createdByRole,
+          createdByName,
+        });
+        return;
+      }
+
+      const admins = await listAdmins();
+      for (const admin of admins) {
+        if (admin.id === createdById) continue;
+        await createNotification({
+          userId: admin.id,
+          title: `Reply: ${requestTitle}`,
+          body: `${createdByName}: ${preview}`,
+          type: "support_request_reply",
+          requestId,
+          createdById,
+          createdByRole,
+          createdByName,
         });
       }
     },

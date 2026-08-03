@@ -129,5 +129,245 @@
     }
   },
   "unread": "Unread",
-  "createAccount": "Create an account"
+  "createAccount": "Create an account",
+  "adminPanelSubtitle": "Operations console",
+  "adminConsoleLabel": "Admin console",
+  "adminRoleLabel": "Administrator",
+  "myRequests": "My requests",
+  "myRequestsSubtitle": "Send requests to admin and track replies",
+  "newRequest": "New request",
+  "newRequestSubtitle": "Send a request to admin. You can attach one optional image.",
+  "requestTitle": "Title",
+  "requestDescription": "Description",
+  "addImageOptional": "Add image (optional)",
+  "removeImage": "Remove image",
+  "sendRequest": "Send request",
+  "requestSentToAdmin": "Request sent to admin",
+  "titleRequired": "Title is required",
+  "descriptionRequired": "Description is required",
+  "searchYourRequests": "Search your requests…",
+  "searchRequestsAdmin": "Search by name, title, role…",
+  "allStatuses": "All statuses",
+  "noRequests": "No requests",
+  "noRequestsSubtitle": "Create a request to ask admin for help.",
+  "noRequestsAdminSubtitle": "Requests from customers, supervisors, and riders will appear here.",
+  "adminActions": "Admin actions",
+  "markInProgress": "Mark in progress",
+  "completeAction": "Complete",
+  "rejectAction": "Reject",
+  "conversation": "Conversation",
+  "noRepliesYet": "No replies yet. Start the conversation below.",
+  "writeAReply": "Write a reply",
+  "markedAsStatus": "Marked as {status}",
+  "@markedAsStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "requestNoLongerAcceptsReplies": "This request is {status} and no longer accepts replies.",
+  "@requestNoLongerAcceptsReplies": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "supportStatusOpen": "Open",
+  "supportStatusInProgress": "In progress",
+  "supportStatusCompleted": "Completed",
+  "supportStatusRejected": "Rejected",
+  "supportStatusClosed": "Closed",
+  "pushNotifications": "Push notifications",
+  "pushEnabledWithToken": "Enabled · token {token}",
+  "@pushEnabledWithToken": {
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "pushDisabledHint": "Disabled — tap to allow notifications",
+  "enable": "Enable",
+  "notificationsEnabled": "Notifications enabled",
+  "couldNotEnableNotifications": "Could not enable notifications",
+  "orderType": "Order type",
+  "orderTypeInstant": "Instant",
+  "orderTypeScheduled": "Scheduled",
+  "instantOrderOngoingHint": "You already have an ongoing instant order",
+  "instantOrderStartHint": "Start delivery as soon as possible",
+  "scheduledOrderExistingHint": "You already have a scheduled order",
+  "scheduledOrderChooseHint": "Choose a later date and time",
+  "selectDateAndTime": "Select date & time",
+  "scheduledForLabel": "Scheduled for {when}",
+  "@scheduledForLabel": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "deliveryLocation": "Delivery location",
+  "mySavedAddress": "My saved address",
+  "noAddressOnProfile": "No address on profile",
+  "noAddressOnYourProfile": "No address on your profile",
+  "differentLocationForOrder": "Different location for this order",
+  "searchAndPinCustom": "Search and pin a custom delivery point",
+  "deliveringTo": "Delivering to",
+  "selectedCustomLocation": "Selected: {address} (custom location)",
+  "@selectedCustomLocation": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduledTimeMustBeFuture": "Scheduled time must be in the future",
+  "deliveryAddressRequired": "Delivery address is required",
+  "deliveryLocationRequired": "Delivery location is required",
+  "selectABranch": "Select a branch",
+  "selectScheduleDateTime": "Select a schedule date and time",
+  "alreadyHaveInstantOrder": "You already have an ongoing instant order",
+  "alreadyHaveScheduledOrder": "You already have a scheduled order",
+  "orderProductTitle": "Order {name}",
+  "@orderProductTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "upcomingScheduled": "Upcoming scheduled",
+  "searchAddress": "Search address",
+  "searchAddressHint": "e.g. Gulshan-e-Iqbal, Karachi",
+  "searchAddressHelp": "Search an address, then fine-tune the pin on the map",
+  "clear": "Clear",
+  "branch": "Branch",
+  "noActiveBranches": "No active branches available",
+  "recommended": "Recommended",
+  "kmAway": "{km} km away",
+  "@kmAway": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "tabRequested": "Requested",
+  "tabScheduled": "Scheduled",
+  "tabOthersWithCount": "Others ({count})",
+  "@tabOthersWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noRequestedOrders": "No requested orders",
+  "noRequestedOrdersSubtitle": "Instant and due scheduled orders appear here.",
+  "noScheduledOrders": "No scheduled orders",
+  "noScheduledOrdersSubtitle": "Orders scheduled for later appear here until their time arrives.",
+  "waiting": "Waiting",
+  "qtyWithValue": "Qty {quantity}",
+  "@qtyWithValue": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      }
+    }
+  },
+  "assignOrder": "Assign order",
+  "scheduledOrderTitle": "Scheduled order",
+  "customerWithName": "Customer: {name}",
+  "@customerWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noteWithText": "Note: {note}",
+  "@noteWithText": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduledAssignLockedHint": "This order is scheduled. You can review details now, but assignment unlocks when the scheduled time arrives.",
+  "selectRider": "Select rider",
+  "myBranch": "My branch",
+  "otherBranches": "Other branches",
+  "noRidersInGroup": "No riders in this group",
+  "estimatedArrival": "Estimated arrival",
+  "assignAndNotifyRider": "Assign & notify rider",
+  "newlyAssigned": "Newly Assigned",
+  "noAssignedOrders": "No assigned orders",
+  "noAssignedOrdersSubtitle": "New deliveries from your supervisor will appear here.",
+  "startDelivery": "Start delivery",
+  "markArrived": "Mark arrived",
+  "viewAllActive": "View all {count} active",
+  "@viewAllActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noOrdersMatchFilters": "No orders match filters",
+  "tryChangingSearchOrFilters": "Try changing search or filters.",
+  "status": "Status",
+  "customer": "Customer",
+  "qtyTotal": "Qty / Total",
+  "placed": "Placed",
+  "supervisorEta": "Supervisor ETA",
+  "supervisor": "Supervisor",
+  "note": "Note",
+  "back": "Back",
+  "statToday": "Today",
+  "statNewAssigned": "New assigned",
+  "statNewRequests": "New requests",
+  "statInProgress": "In progress",
+  "statCompleted": "Completed",
+  "statFailed": "Failed",
+  "statPending": "Pending",
+  "statTotalRange": "Total (range)",
+  "statRevenue": "Revenue",
+  "vehicleWithPlate": "Vehicle: {plate}",
+  "@vehicleWithPlate": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "branchWithId": "Branch: {id}",
+  "@branchWithId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "created": "Created",
+  "timeSpent": "Time spent",
+  "supervisorNotified": "Supervisor notified",
+  "rider": "Rider",
+  "eta": "ETA",
+  "sendMessageToSupervisor": "Send message to supervisor",
+  "searchCustomerOrPhone": "Search customer or phone",
+  "searchCustomerOrRider": "Search customer or rider",
+  "orderDetails": "Order details",
+  "waitingCustomerConfirm": "Waiting for customer to confirm delivery.",
+  "view": "View",
+  "newOrdersWaiting": "{count} new order(s) waiting",
+  "@newOrdersWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "openOrdersToAssignHint": "Open Orders → Requested to assign a rider"
 }

@@ -8,6 +8,7 @@ import '../../routing/supervisor_routes.dart';
 import '../notifications/supervisor_notifications_bell_button.dart';
 import '../notifications/supervisor_notifications_controller.dart';
 import '../orders/supervisor_orders_controller.dart';
+import '../../../../shared/requests/support_requests_app_bar_button.dart';
 
 class SupervisorHomeScreen extends StatelessWidget {
   const SupervisorHomeScreen({super.key});
@@ -52,6 +53,9 @@ class SupervisorHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const SupportRequestsAppBarButton(
+          route: SupervisorRoutes.requests,
+        ),
         title: Text(l10n.supervisorHomeTitle),
         actions: const [SupervisorNotificationsBellButton()],
       ),
@@ -89,7 +93,7 @@ class SupervisorHomeScreen extends StatelessWidget {
                       trailing: TextButton(
                         onPressed: () =>
                             context.push(SupervisorRoutes.notifications),
-                        child: const Text('View'),
+                        child: Text(l10n.view),
                       ),
                     ),
                   ],
@@ -104,14 +108,14 @@ class SupervisorHomeScreen extends StatelessWidget {
                     color: context.colors.onErrorContainer,
                   ),
                   title: Text(
-                    '${controller.newOrderCount} new order(s) waiting',
+                    l10n.newOrdersWaiting(controller.newOrderCount),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: context.colors.onErrorContainer,
                     ),
                   ),
                   subtitle: Text(
-                    'Open Orders → Requested to assign a rider',
+                    l10n.openOrdersToAssignHint,
                     style: TextStyle(color: context.colors.onErrorContainer),
                   ),
                   onTap: () => context.go(SupervisorRoutes.orders),
@@ -135,38 +139,38 @@ class SupervisorHomeScreen extends StatelessWidget {
                 final cardWidth = (constraints.maxWidth - gap) / 2;
                 final cards = [
                   _StatCard(
-                    label: 'Today',
+                    label: l10n.statToday,
                     value: '${controller.todayOrderCount}',
                     icon: Icons.today,
                   ),
                   _StatCard(
-                    label: 'New requests',
+                    label: l10n.statNewRequests,
                     value: '${controller.newOrderCount}',
                     icon: Icons.inbox,
                   ),
                   _StatCard(
-                    label: 'Total (range)',
+                    label: l10n.statTotalRange,
                     value: '${controller.statsTotalOrders}',
                     icon: Icons.receipt_long,
                   ),
                   _StatCard(
-                    label: 'Revenue',
+                    label: l10n.statRevenue,
                     value:
                         'Rs ${controller.statsRevenue.toStringAsFixed(0)}',
                     icon: Icons.payments_outlined,
                   ),
                   _StatCard(
-                    label: 'Pending',
+                    label: l10n.statPending,
                     value: '${controller.statsPendingOrders}',
                     icon: Icons.hourglass_top,
                   ),
                   _StatCard(
-                    label: 'In progress',
+                    label: l10n.statInProgress,
                     value: '${controller.statsInProgressOrders}',
                     icon: Icons.local_shipping_outlined,
                   ),
                   _StatCard(
-                    label: 'Completed',
+                    label: l10n.statCompleted,
                     value: '${controller.statsCompletedOrders}',
                     icon: Icons.check_circle_outline,
                   ),

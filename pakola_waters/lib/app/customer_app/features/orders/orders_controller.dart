@@ -34,6 +34,30 @@ class OrdersController extends ChangeNotifier {
   String? get error => _error;
   bool get hasActiveOrder => _activeOrder != null;
 
+  /// Ongoing instant + activated scheduled (excludes parked scheduled holds).
+  List<DeliveryOrder> get activeOrders =>
+      _orders.where((order) => order.status.isActive).toList();
+
+  bool get hasOpenInstantOrder => _orders.any(
+        (order) =>
+            order.status.isOpen && order.orderType == OrderType.instant,
+      );
+
+  bool get hasOpenScheduledOrder => _orders.any(
+        (order) =>
+            order.status.isOpen && order.orderType == OrderType.scheduled,
+      );
+
+  /// True when at least one of instant/scheduled slots is free.
+  bool get canPlaceOrder => !hasOpenInstantOrder || !hasOpenScheduledOrder;
+
+  DeliveryOrder? get openScheduledOrder {
+    for (final order in _orders) {
+      if (order.status.isScheduledHold) return order;
+    }
+    return null;
+  }
+
   Branch? branchFor(String branchId) {
     for (final branch in _branches) {
       if (branch.id == branchId) return branch;
@@ -95,6 +119,8 @@ class OrdersController extends ChangeNotifier {
     required String deliveryAddress,
     required GeoLocation deliveryLocation,
     bool isCustomDeliveryLocation = false,
+    OrderType orderType = OrderType.instant,
+    DateTime? scheduledFor,
     String? note,
   }) async {
     final user = _user;
@@ -110,6 +136,18 @@ class OrdersController extends ChangeNotifier {
     if (quantity < 1) {
       return const FailureResult(ServerFailure('Quantity must be at least 1'));
     }
+    if (orderType == OrderType.scheduled) {
+      if (scheduledFor == null) {
+        return const FailureResult(
+          ServerFailure('Select a date and time for the scheduled order'),
+        );
+      }
+      if (!scheduledFor.isAfter(DateTime.now())) {
+        return const FailureResult(
+          ServerFailure('Scheduled time must be in the future'),
+        );
+      }
+    }
 
     _isSubmitting = true;
     _error = null;
@@ -117,6 +155,7 @@ class OrdersController extends ChangeNotifier {
 
     final unitPrice = product.effectivePrice;
     final branch = branchFor(branchId);
+    final isScheduled = orderType == OrderType.scheduled;
     final order = DeliveryOrder(
       id: '',
       customerId: user.id,
@@ -131,7 +170,9 @@ class OrdersController extends ChangeNotifier {
       lineTotal: unitPrice * quantity,
       note: note?.trim().isEmpty == true ? null : note?.trim(),
       paymentMethod: paymentMethod,
-      status: OrderStatus.pending,
+      status: isScheduled ? OrderStatus.scheduled : OrderStatus.pending,
+      orderType: orderType,
+      scheduledFor: scheduledFor?.toIso8601String(),
       deliveryAddress: deliveryAddress.trim(),
       deliveryLocation: deliveryLocation,
       isCustomDeliveryLocation: isCustomDeliveryLocation,

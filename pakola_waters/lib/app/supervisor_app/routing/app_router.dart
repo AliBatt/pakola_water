@@ -9,6 +9,7 @@ import '../features/orders/supervisor_orders_screen.dart';
 import '../features/settings/supervisor_settings_screen.dart';
 import '../features/shell/supervisor_shell.dart';
 import '../routing/supervisor_routes.dart';
+import '../../../shared/requests/support_requests_screen.dart';
 
 GoRouter createAppRouter({
   required AppConfig config,
@@ -49,6 +50,10 @@ GoRouter createAppRouter({
       GoRoute(
         path: SupervisorRoutes.notifications,
         builder: (context, state) => const SupervisorNotificationsScreen(),
+      ),
+      GoRoute(
+        path: SupervisorRoutes.requests,
+        builder: (context, state) => const SupportRequestsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

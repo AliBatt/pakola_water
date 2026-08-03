@@ -60,6 +60,7 @@ class NotificationServiceImpl implements NotificationService {
           read: false,
           type: notification.type,
           orderId: notification.orderId,
+          requestId: notification.requestId,
         ),
       );
     } catch (error) {

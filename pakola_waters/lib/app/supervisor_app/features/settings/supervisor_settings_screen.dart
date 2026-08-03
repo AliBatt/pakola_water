@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
 
 import '../../../../shared/push/app_push_controller.dart';
+import '../../../../shared/requests/support_requests_app_bar_button.dart';
+import '../../routing/supervisor_routes.dart';
 import '../notifications/supervisor_notifications_bell_button.dart';
 
 class SupervisorSettingsScreen extends StatelessWidget {
@@ -76,6 +78,9 @@ class SupervisorSettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const SupportRequestsAppBarButton(
+          route: SupervisorRoutes.requests,
+        ),
         title: Text(l10n.navSettings),
         actions: const [SupervisorNotificationsBellButton()],
       ),
@@ -93,7 +98,7 @@ class SupervisorSettingsScreen extends StatelessWidget {
             Text(user.email),
             if (user.phone != null) Text(user.phone!),
             if (user.primaryBranchId != null)
-              Text('Branch: ${user.primaryBranchId}'),
+              Text(l10n.branchWithId(user.primaryBranchId!)),
             const Divider(height: AppSpacing.xl),
           ],
           ListTile(
@@ -102,12 +107,11 @@ class SupervisorSettingsScreen extends StatelessWidget {
                   ? Icons.notifications_active_outlined
                   : Icons.notifications_off_outlined,
             ),
-            title: const Text('Push notifications'),
+            title: Text(l10n.pushNotifications),
             subtitle: Text(
               push.isRegistered
-                  ? 'Enabled · token ${push.tokenPreview}'
-                  : (push.lastError ??
-                      'Disabled — tap Enable to allow notifications'),
+                  ? l10n.pushEnabledWithToken(push.tokenPreview ?? '')
+                  : (push.lastError ?? l10n.pushDisabledHint),
             ),
             trailing: push.isRegistered
                 ? null
@@ -119,16 +123,16 @@ class SupervisorSettingsScreen extends StatelessWidget {
                       if (!context.mounted) return;
                       final current = context.read<AppPushController>();
                       if (current.isRegistered) {
-                        AppSnackBar.success(context, 'Notifications enabled');
+                        AppSnackBar.success(context, l10n.notificationsEnabled);
                       } else {
                         AppSnackBar.warning(
                           context,
                           current.lastError ??
-                              'Could not enable notifications',
+                              l10n.couldNotEnableNotifications,
                         );
                       }
                     },
-                    child: const Text('Enable'),
+                    child: Text(l10n.enable),
                   ),
           ),
           const Divider(height: AppSpacing.xl),

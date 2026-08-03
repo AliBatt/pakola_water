@@ -92,6 +92,12 @@ class DeliveryOrderDetailsSheet extends StatelessWidget {
               _InfoRow(label: 'Supervisor', value: order.supervisorName!),
             if (order.note != null && order.note!.isNotEmpty)
               _InfoRow(label: 'Note', value: order.note!),
+            _InfoRow(label: 'Type', value: order.orderType.label),
+            if (order.scheduledFor != null)
+              _InfoRow(
+                label: 'Scheduled for',
+                value: formatTs(order.scheduledFor),
+              ),
             const Divider(height: AppSpacing.xl),
             DeliveryContactSection(order: order),
             if (actionButtons != null && actionButtons!.isNotEmpty) ...[

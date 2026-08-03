@@ -56,6 +56,10 @@ abstract class OrderService {
     String? reason,
   });
   Future<Result<bool>> hasActiveOrder(String customerId);
+  Future<Result<bool>> hasOpenOrderOfType({
+    required String customerId,
+    required OrderType orderType,
+  });
 }
 
 class OrderServiceImpl implements OrderService {
@@ -87,6 +91,9 @@ class OrderServiceImpl implements OrderService {
       'riderArrivedAt',
       'deliveredAt',
       'failedAt',
+      'scheduledFor',
+      'scheduledActivatedAt',
+      'cancelledAt',
     ]) {
       final value = data[key];
       if (value is Timestamp) {
@@ -98,24 +105,65 @@ class OrderServiceImpl implements OrderService {
   @override
   Future<Result<DeliveryOrder>> createOrder(DeliveryOrder order) async {
     try {
-      final active = await hasActiveOrder(order.customerId);
-      if (active case Success<bool>(value: true)) {
-        return const FailureResult(
-          ServerFailure('You already have an ongoing order'),
+      final orderType = order.orderType;
+      final isScheduled = orderType == OrderType.scheduled;
+      final scheduledFor = order.scheduledForDate;
+
+      if (isScheduled) {
+        if (scheduledFor == null) {
+          return const FailureResult(
+            ServerFailure('Select a date and time for the scheduled order'),
+          );
+        }
+        if (!scheduledFor.isAfter(DateTime.now())) {
+          return const FailureResult(
+            ServerFailure('Scheduled time must be in the future'),
+          );
+        }
+      }
+
+      final openSlot = await hasOpenOrderOfType(
+        customerId: order.customerId,
+        orderType: orderType,
+      );
+      if (openSlot case Success<bool>(value: true)) {
+        return FailureResult(
+          ServerFailure(
+            isScheduled
+                ? 'You already have a scheduled order'
+                : 'You already have an ongoing instant order',
+          ),
         );
+      }
+      if (openSlot case FailureResult(:final failure)) {
+        return FailureResult(failure);
       }
 
       final docRef =
           _firestoreService.collection(CollectionPaths.orders).doc();
+      final status =
+          isScheduled ? OrderStatus.scheduled : OrderStatus.pending;
       final data = order.toJson()
         ..['createdAt'] = FieldValue.serverTimestamp()
         ..['updatedAt'] = FieldValue.serverTimestamp()
-        ..['status'] = OrderStatus.pending.name
+        ..['status'] = status.name
+        ..['orderType'] = orderType.name
         ..['paymentStatus'] = PaymentStatus.pending.name
-        ..['createdBy'] = order.customerId;
+        ..['createdBy'] = order.customerId
+        ..['scheduledFor'] = isScheduled && scheduledFor != null
+            ? Timestamp.fromDate(scheduledFor)
+            : null
+        ..['scheduledActivatedAt'] = null;
 
       await docRef.set(data);
-      return Success(order.copyWith(id: docRef.id));
+      return Success(
+        order.copyWith(
+          id: docRef.id,
+          status: status,
+          orderType: orderType,
+          scheduledFor: scheduledFor?.toIso8601String(),
+        ),
+      );
     } catch (error) {
       return FailureResult(ServerFailure(error.toString()));
     }
@@ -198,10 +246,43 @@ class OrderServiceImpl implements OrderService {
         isEqualTo: customerId,
       );
       final hasActive = snapshot.docs.any((doc) {
-        final status = doc.data()['status'] as String? ?? '';
-        return !_terminalStatuses.contains(status);
+        final status = OrderStatus.fromString(
+          doc.data()['status'] as String? ?? '',
+        );
+        return status.isActive;
       });
       return Success(hasActive);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<bool>> hasOpenOrderOfType({
+    required String customerId,
+    required OrderType orderType,
+  }) async {
+    try {
+      final snapshot = await _firestoreService.queryWhere(
+        CollectionPaths.orders,
+        field: 'customerId',
+        isEqualTo: customerId,
+      );
+      final hasOpen = snapshot.docs.any((doc) {
+        final data = doc.data();
+        final status = OrderStatus.fromString(
+          data['status'] as String? ?? '',
+        );
+        if (!status.isOpen) return false;
+        final type = OrderType.fromString(
+          data['orderType'] as String? ??
+              (status == OrderStatus.scheduled
+                  ? OrderType.scheduled.name
+                  : OrderType.instant.name),
+        );
+        return type == orderType;
+      });
+      return Success(hasOpen);
     } catch (error) {
       return FailureResult(ServerFailure(error.toString()));
     }
@@ -311,6 +392,26 @@ class OrderServiceImpl implements OrderService {
     required DateTime estimatedArrivalAt,
   }) async {
     try {
+      final snapshot =
+          await _firestoreService.doc(CollectionPaths.orders, orderId).get();
+      if (!snapshot.exists) {
+        return const FailureResult(ServerFailure('Order not found'));
+      }
+      final data = snapshot.data() ?? {};
+      final status = OrderStatus.fromString(data['status'] as String? ?? '');
+      if (status == OrderStatus.scheduled) {
+        return const FailureResult(
+          ServerFailure(
+            'This scheduled order cannot be assigned until its time arrives',
+          ),
+        );
+      }
+      if (!status.isRequested) {
+        return const FailureResult(
+          ServerFailure('Only pending orders can be assigned'),
+        );
+      }
+
       await _firestoreService.updateDoc(
         CollectionPaths.orders,
         orderId,
@@ -530,7 +631,7 @@ class OrderServiceImpl implements OrderService {
 
       final data = snapshot.data() ?? {};
       final status = OrderStatus.fromString(data['status'] as String? ?? '');
-      if (!status.isActive) {
+      if (!status.isOpen) {
         return const FailureResult(
           ServerFailure('Order is already closed'),
         );

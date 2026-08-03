@@ -1,6 +1,5 @@
 import 'package:authentication/authentication.dart';
 import 'package:go_router/go_router.dart';
-import 'package:l10n/l10n.dart';
 import 'package:rider_management/rider_management.dart';
 
 import '../config/app_config.dart';
@@ -12,8 +11,8 @@ import '../features/orders/admin_orders_screen.dart';
 import '../features/payments/admin_payments_screen.dart';
 import '../features/products/products_screen.dart';
 import '../features/reports/admin_reports_screen.dart';
+import '../features/requests/admin_requests_screen.dart';
 import '../features/settings/admin_settings_screen.dart';
-import '../features/shell/admin_placeholder_page.dart';
 import '../features/shell/admin_shell.dart';
 import '../features/supervisors/supervisors_screen.dart';
 import 'admin_routes.dart';
@@ -105,14 +104,15 @@ GoRouter createAppRouter({
               child: AdminReportsScreen(),
             ),
           ),
-          GoRoute(
-            path: AdminRoutes.inventory,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navInventory,
-              ),
-            ),
-          ),
+          // Inventory route kept for later; nav entry is commented out.
+          // GoRoute(
+          //   path: AdminRoutes.inventory,
+          //   pageBuilder: (context, state) => NoTransitionPage(
+          //     child: AdminPlaceholderPage(
+          //       title: context.l10n.navInventory,
+          //     ),
+          //   ),
+          // ),
           GoRoute(
             path: AdminRoutes.products,
             pageBuilder: (context, state) => const NoTransitionPage(
@@ -127,10 +127,8 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: AdminRoutes.requests,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: AdminPlaceholderPage(
-                title: context.l10n.navRequests,
-              ),
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AdminRequestsScreen(),
             ),
           ),
           GoRoute(

@@ -18,6 +18,9 @@ class CustomerPushRoutes {
       case 'order_review':
       case 'order_delivered':
         return CustomerRoutes.orders;
+      case 'support_request_reply':
+      case 'support_request_status':
+        return CustomerRoutes.requests;
       case 'admin_message':
       default:
         return CustomerRoutes.notifications;

@@ -116,7 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<OrdersController>();
-    final order = controller.activeOrder;
+    final activeOrders = controller.activeOrders;
+    final scheduled = controller.openScheduledOrder;
     final l10n = context.l10n;
 
     return Scaffold(
@@ -126,11 +127,34 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
-        child: order == null
+        child: activeOrders.isEmpty
             ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 children: [
+                  if (scheduled != null) ...[
+                    Text(
+                      l10n.upcomingScheduled,
+                      style: context.texts.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Card(
+                      child: ListTile(
+                        onTap: () => _showOrderDetails(context, scheduled),
+                        leading: const Icon(Icons.schedule),
+                        title: Text(scheduled.productName),
+                        subtitle: Text(
+                          l10n.scheduledForLabel(
+                            DateTimeFormatter.formatLong(scheduled.scheduledFor),
+                          ),
+                        ),
+                        trailing: Chip(label: Text(scheduled.status.label)),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
                   SizedBox(
                     height: MediaQuery.sizeOf(context).height * 0.45,
                     child: Column(
@@ -165,111 +189,159 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               )
             : ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              children: [
-                Text(
-                  l10n.ongoingOrder,
-                  style: context.texts.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Card(
-                  child: InkWell(
-                    onTap: () => _showOrderDetails(context, order),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  order.productName,
-                                  style: context.texts.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              Chip(label: Text(order.status.label)),
-                            ],
-                          ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          'Qty ${order.quantity} · Rs ${order.lineTotal.toStringAsFixed(0)} · ${order.paymentMethod.label}',
-                        ),
-                        if (order.note != null && order.note!.isNotEmpty) ...[
-                          const SizedBox(height: AppSpacing.sm),
-                          Text('Note: ${order.note}'),
-                        ],
-                        const Divider(height: AppSpacing.xl),
-                        _DetailRow(
-                          label: 'Status',
-                          value: order.status.label,
-                        ),
-                        _DetailRow(
-                          label: 'Created',
-                          value: DateTimeFormatter.format(order.createdAt),
-                        ),
-                        _DetailRow(
-                          label: 'Time spent',
-                          value: _elapsed(order),
-                        ),
-                        _DetailRow(
-                          label: 'Supervisor notified',
-                          value: order.supervisorNotifiedAt != null ||
-                                  order.status.index >=
-                                      OrderStatus.supervisorNotified.index
-                              ? DateTimeFormatter.format(
-                                  order.supervisorNotifiedAt ?? order.createdAt,
-                                )
-                              : 'Waiting…',
-                        ),
-                        _DetailRow(
-                          label: 'Rider',
-                          value: order.riderName?.isNotEmpty == true
-                              ? order.riderName!
-                              : (order.status.index >=
-                                      OrderStatus.assigned.index
-                                  ? 'Assigned'
-                                  : 'Not assigned yet'),
-                        ),
-                        _DetailRow(
-                          label: 'ETA',
-                          value: order.estimatedArrivalAt == null
-                              ? 'Not set yet'
-                              : DateTimeFormatter.format(order.estimatedArrivalAt),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _StatusTimeline(order: order),
-                        if (order.status == OrderStatus.riderArrived) ...[
-                          const SizedBox(height: AppSpacing.lg),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: () => _confirmDelivery(order),
-                              child: Text(l10n.confirmDelivery),
-                            ),
-                          ),
-                        ],
-                        if (order.status.isActive) ...[
-                          const SizedBox(height: AppSpacing.lg),
-                          OutlinedButton.icon(
-                            onPressed: () => _showOrderDetails(context, order),
-                            icon: const Icon(Icons.message_outlined),
-                            label: const Text('Send message to supervisor'),
-                          ),
-                        ],
-                      ],
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                children: [
+                  Text(
+                    activeOrders.length == 1
+                        ? l10n.ongoingOrder
+                        : 'Ongoing orders',
+                    style: context.texts.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ),
+                  const SizedBox(height: AppSpacing.md),
+                  for (final order in activeOrders) ...[
+                    _OngoingOrderCard(
+                      order: order,
+                      elapsed: _elapsed(order),
+                      onOpen: () => _showOrderDetails(context, order),
+                      onConfirm: () => _confirmDelivery(order),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  if (scheduled != null) ...[
+                    Text(
+                      l10n.upcomingScheduled,
+                      style: context.texts.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Card(
+                      child: ListTile(
+                        onTap: () => _showOrderDetails(context, scheduled),
+                        leading: const Icon(Icons.schedule),
+                        title: Text(scheduled.productName),
+                        subtitle: Text(
+                          l10n.scheduledForLabel(
+                            DateTimeFormatter.formatLong(scheduled.scheduledFor),
+                          ),
+                        ),
+                        trailing: Chip(label: Text(scheduled.status.label)),
+                      ),
+                    ),
+                  ],
+                ],
               ),
+      ),
+    );
+  }
+}
+
+class _OngoingOrderCard extends StatelessWidget {
+  const _OngoingOrderCard({
+    required this.order,
+    required this.elapsed,
+    required this.onOpen,
+    required this.onConfirm,
+  });
+
+  final DeliveryOrder order;
+  final String elapsed;
+  final VoidCallback onOpen;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Card(
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      order.productName,
+                      style: context.texts.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Chip(label: Text(order.orderType.label)),
+                  const SizedBox(width: AppSpacing.sm),
+                  Chip(label: Text(order.status.label)),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Qty ${order.quantity} · Rs ${order.lineTotal.toStringAsFixed(0)} · ${order.paymentMethod.label}',
+              ),
+              if (order.note != null && order.note!.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(l10n.noteWithText(order.note!)),
               ],
-            ),
+              const Divider(height: AppSpacing.xl),
+              _DetailRow(label: l10n.status, value: order.status.label),
+              _DetailRow(
+                label: l10n.created,
+                value: DateTimeFormatter.format(order.createdAt),
+              ),
+              _DetailRow(label: l10n.timeSpent, value: elapsed),
+              _DetailRow(
+                label: l10n.supervisorNotified,
+                value: order.supervisorNotifiedAt != null ||
+                        order.status.index >=
+                            OrderStatus.supervisorNotified.index
+                    ? DateTimeFormatter.format(
+                        order.supervisorNotifiedAt ?? order.createdAt,
+                      )
+                    : 'Waiting…',
+              ),
+              _DetailRow(
+                label: l10n.rider,
+                value: order.riderName?.isNotEmpty == true
+                    ? order.riderName!
+                    : (order.status.index >= OrderStatus.assigned.index
+                        ? 'Assigned'
+                        : 'Not assigned yet'),
+              ),
+              _DetailRow(
+                label: l10n.eta,
+                value: order.estimatedArrivalAt == null
+                    ? 'Not set yet'
+                    : DateTimeFormatter.format(order.estimatedArrivalAt),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _StatusTimeline(order: order),
+              if (order.status == OrderStatus.riderArrived) ...[
+                const SizedBox(height: AppSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: onConfirm,
+                    child: Text(l10n.confirmDelivery),
+                  ),
+                ),
+              ],
+              if (order.status.isActive) ...[
+                const SizedBox(height: AppSpacing.lg),
+                OutlinedButton.icon(
+                  onPressed: onOpen,
+                  icon: const Icon(Icons.message_outlined),
+                  label: Text(l10n.sendMessageToSupervisor),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

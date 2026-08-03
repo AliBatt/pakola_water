@@ -9,6 +9,7 @@ import '../features/orders/orders_screen.dart';
 import '../features/products/products_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/shell/customer_shell.dart';
+import '../../../shared/requests/support_requests_screen.dart';
 import 'customer_routes.dart';
 
 GoRouter createAppRouter({
@@ -59,6 +60,10 @@ GoRouter createAppRouter({
       GoRoute(
         path: CustomerRoutes.notifications,
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: CustomerRoutes.requests,
+        builder: (context, state) => const SupportRequestsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

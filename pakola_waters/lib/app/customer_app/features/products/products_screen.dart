@@ -131,10 +131,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 ),
                                 trailing: FilledButton(
                                   onPressed: () {
-                                    if (ordersController.hasActiveOrder) {
+                                    if (!ordersController.canPlaceOrder) {
                                       AppSnackBar.warning(
                                         context,
-                                        l10n.activeOrderBlock,
+                                        'You already have an instant and a scheduled order',
                                       );
                                       return;
                                     }

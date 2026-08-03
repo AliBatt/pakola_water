@@ -12,6 +12,7 @@ import '../../../shared/push/driver_push_routes.dart';
 import '../../../shared/push/local_notification_presenter.dart';
 import '../features/notifications/driver_notifications_controller.dart';
 import '../features/orders/driver_orders_controller.dart';
+import '../../../shared/requests/support_requests_controller.dart';
 
 class AppProvidersResult {
   const AppProvidersResult({
@@ -45,6 +46,10 @@ class AppProviders {
       notificationService,
       userService,
     );
+    final supportRequestService = SupportRequestServiceImpl(
+      firestoreService,
+      notificationService,
+    );
 
     final authRepository = AuthRepositoryImpl(authService);
     final userRepository = UserRepositoryImpl(userService);
@@ -53,6 +58,8 @@ class AppProviders {
         NotificationRepositoryImpl(notificationService);
     final orderMessageRepository =
         OrderMessageRepositoryImpl(orderMessageService);
+    final supportRequestRepository =
+        SupportRequestRepositoryImpl(supportRequestService);
 
     final authProvider = AuthProvider(
       authRepository: authRepository,
@@ -80,6 +87,9 @@ class AppProviders {
         Provider<OrderRepository>.value(value: orderRepository),
         Provider<NotificationRepository>.value(value: notificationRepository),
         Provider<OrderMessageRepository>.value(value: orderMessageRepository),
+        Provider<SupportRequestRepository>.value(
+          value: supportRequestRepository,
+        ),
         Provider<FirebaseMessagingService>.value(value: messagingService),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
         ChangeNotifierProvider<LocaleController>.value(value: localeController),
@@ -87,6 +97,19 @@ class AppProviders {
           create: (_) => pushController,
           update: (context, auth, previous) {
             final controller = previous ?? pushController;
+            controller.bindUser(auth.user);
+            return controller;
+          },
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, SupportRequestsController>(
+          create: (_) => SupportRequestsController(
+            requestRepository: supportRequestRepository,
+          ),
+          update: (context, auth, previous) {
+            final controller = previous ??
+                SupportRequestsController(
+                  requestRepository: supportRequestRepository,
+                );
             controller.bindUser(auth.user);
             return controller;
           },

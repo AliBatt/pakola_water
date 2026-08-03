@@ -24,5 +24,11 @@ service firebase.storage {
       // Deletes have no request.resource — do not check contentType/size.
       allow delete: if signedIn();
     }
+
+    match /support_requests/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if signedIn() && isValidImageUpload();
+      allow delete: if signedIn();
+    }
   }
 }

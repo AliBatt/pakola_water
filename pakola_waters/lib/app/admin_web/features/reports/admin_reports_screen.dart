@@ -982,6 +982,7 @@ class _StatusPieChart extends StatelessWidget {
 
     final colors = <OrderStatus, Color>{
       OrderStatus.pending: context.colors.outline,
+      OrderStatus.scheduled: AppColors.info,
       OrderStatus.supervisorNotified: AppColors.info,
       OrderStatus.assigned: context.colors.primary,
       OrderStatus.outForDelivery: AppColors.warning,

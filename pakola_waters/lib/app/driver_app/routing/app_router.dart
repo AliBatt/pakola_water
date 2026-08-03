@@ -8,6 +8,7 @@ import '../features/orders/driver_orders_screen.dart';
 import '../features/settings/driver_settings_screen.dart';
 import '../features/shell/driver_shell.dart';
 import 'driver_routes.dart';
+import '../../../shared/requests/support_requests_screen.dart';
 
 GoRouter createAppRouter({
   required AppConfig config,
@@ -48,6 +49,10 @@ GoRouter createAppRouter({
       GoRoute(
         path: DriverRoutes.notifications,
         builder: (context, state) => const DriverNotificationsScreen(),
+      ),
+      GoRoute(
+        path: DriverRoutes.requests,
+        builder: (context, state) => const SupportRequestsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

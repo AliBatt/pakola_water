@@ -274,6 +274,12 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     _InfoRow(label: 'Rider', value: order.riderName!),
                   if (order.note != null && order.note!.isNotEmpty)
                     _InfoRow(label: 'Note', value: order.note!),
+                  _InfoRow(label: 'Type', value: order.orderType.label),
+                  if (order.scheduledFor != null)
+                    _InfoRow(
+                      label: 'Scheduled for',
+                      value: widget.formatTs(order.scheduledFor),
+                    ),
                   const Divider(height: AppSpacing.xl),
                   DeliveryContactSection(
                     order: order,

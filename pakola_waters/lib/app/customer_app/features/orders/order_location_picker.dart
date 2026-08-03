@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import 'package:l10n/l10n.dart';
 import 'package:models/models.dart';
 import 'package:shared_widgets/shared_widgets.dart';
 
@@ -209,11 +210,12 @@ class _OrderLocationPickerState extends State<OrderLocationPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Search an address, then fine-tune the pin on the map',
+          l10n.searchAddressHelp,
           style: context.texts.bodySmall?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
@@ -225,8 +227,8 @@ class _OrderLocationPickerState extends State<OrderLocationPicker> {
           onChanged: _onSearchChanged,
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
-            labelText: 'Search address',
-            hintText: 'e.g. Gulshan-e-Iqbal, Karachi',
+            labelText: l10n.searchAddress,
+            hintText: l10n.searchAddressHint,
             prefixIcon: const Icon(Icons.search),
             suffixIcon: _isSearching
                 ? const Padding(
@@ -240,7 +242,7 @@ class _OrderLocationPickerState extends State<OrderLocationPicker> {
                 : (_searchController.text.isEmpty
                     ? null
                     : IconButton(
-                        tooltip: 'Clear',
+                        tooltip: l10n.clear,
                         onPressed: () {
                           _debounce?.cancel();
                           _searchController.clear();

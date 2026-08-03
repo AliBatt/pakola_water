@@ -10,6 +10,7 @@ class AppNotification {
     this.read = false,
     this.type = 'general',
     this.orderId,
+    this.requestId,
     this.createdAt,
   });
 
@@ -25,6 +26,7 @@ class AppNotification {
       read: json['read'] as bool? ?? false,
       type: json['type'] as String? ?? 'general',
       orderId: json['orderId'] as String?,
+      requestId: json['requestId'] as String?,
       createdAt: json['createdAt']?.toString(),
     );
   }
@@ -39,6 +41,7 @@ class AppNotification {
   final bool read;
   final String type;
   final String? orderId;
+  final String? requestId;
   final String? createdAt;
 
   Map<String, dynamic> toJson() => {
@@ -51,6 +54,7 @@ class AppNotification {
         'read': read,
         'type': type,
         'orderId': orderId,
+        'requestId': requestId,
       };
 
   AppNotification copyWith({bool? read}) {
@@ -65,6 +69,7 @@ class AppNotification {
       read: read ?? this.read,
       type: type,
       orderId: orderId,
+      requestId: requestId,
       createdAt: createdAt,
     );
   }

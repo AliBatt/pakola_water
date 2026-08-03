@@ -1,5 +1,6 @@
 import '../common/geo_location.dart';
 import '../enums/order_status.dart';
+import '../enums/order_type.dart';
 import '../enums/payment_method.dart';
 import '../enums/payment_status.dart';
 
@@ -16,6 +17,9 @@ class DeliveryOrder {
     required this.lineTotal,
     required this.paymentMethod,
     required this.status,
+    this.orderType = OrderType.instant,
+    this.scheduledFor,
+    this.scheduledActivatedAt,
     this.customerPhone,
     this.branchName,
     this.note,
@@ -63,6 +67,11 @@ class DeliveryOrder {
         json['paymentStatus'] as String? ?? 'pending',
       ),
       status: OrderStatus.fromString(json['status'] as String? ?? 'pending'),
+      orderType: OrderType.fromString(
+        json['orderType'] as String? ?? 'instant',
+      ),
+      scheduledFor: json['scheduledFor']?.toString(),
+      scheduledActivatedAt: json['scheduledActivatedAt']?.toString(),
       supervisorId: json['supervisorId'] as String?,
       supervisorName: json['supervisorName'] as String?,
       riderId: json['riderId'] as String?,
@@ -106,6 +115,9 @@ class DeliveryOrder {
   final PaymentMethod paymentMethod;
   final PaymentStatus paymentStatus;
   final OrderStatus status;
+  final OrderType orderType;
+  final String? scheduledFor;
+  final String? scheduledActivatedAt;
   final String? supervisorId;
   final String? supervisorName;
   final String? riderId;
@@ -126,6 +138,12 @@ class DeliveryOrder {
   final String? deliveryAddress;
   final GeoLocation? deliveryLocation;
   final bool isCustomDeliveryLocation;
+
+  DateTime? get scheduledForDate => _parse(scheduledFor);
+  DateTime? get scheduledActivatedAtDate => _parse(scheduledActivatedAt);
+
+  bool get isScheduledOrder =>
+      orderType == OrderType.scheduled || status == OrderStatus.scheduled;
 
   /// Address shown in UI, with "(custom location)" when order-specific.
   String get deliveryAddressLabel {
@@ -215,6 +233,9 @@ class DeliveryOrder {
         'paymentMethod': paymentMethod.name,
         'paymentStatus': paymentStatus.name,
         'status': status.name,
+        'orderType': orderType.name,
+        'scheduledFor': scheduledFor,
+        'scheduledActivatedAt': scheduledActivatedAt,
         'supervisorId': supervisorId,
         'supervisorName': supervisorName,
         'riderId': riderId,
@@ -239,6 +260,9 @@ class DeliveryOrder {
   DeliveryOrder copyWith({
     String? id,
     OrderStatus? status,
+    OrderType? orderType,
+    String? scheduledFor,
+    String? scheduledActivatedAt,
     PaymentStatus? paymentStatus,
     String? supervisorId,
     String? supervisorName,
@@ -273,6 +297,9 @@ class DeliveryOrder {
       paymentMethod: paymentMethod,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       status: status ?? this.status,
+      orderType: orderType ?? this.orderType,
+      scheduledFor: scheduledFor ?? this.scheduledFor,
+      scheduledActivatedAt: scheduledActivatedAt ?? this.scheduledActivatedAt,
       supervisorId: supervisorId ?? this.supervisorId,
       supervisorName: supervisorName ?? this.supervisorName,
       riderId: riderId ?? this.riderId,

@@ -59,12 +59,13 @@ class AdminNavDestination {
       selectedIcon: Icons.bar_chart,
       labelBuilder: (l10n) => l10n.navReports,
     ),
-    AdminNavDestination(
-      route: AdminRoutes.inventory,
-      icon: Icons.inventory_2_outlined,
-      selectedIcon: Icons.inventory_2,
-      labelBuilder: (l10n) => l10n.navInventory,
-    ),
+    // Inventory is hidden until the feature is ready.
+    // AdminNavDestination(
+    //   route: AdminRoutes.inventory,
+    //   icon: Icons.inventory_2_outlined,
+    //   selectedIcon: Icons.inventory_2,
+    //   labelBuilder: (l10n) => l10n.navInventory,
+    // ),
     AdminNavDestination(
       route: AdminRoutes.products,
       icon: Icons.water_drop_outlined,

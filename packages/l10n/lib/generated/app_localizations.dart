@@ -685,6 +685,816 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create an account'**
   String get createAccount;
+
+  /// No description provided for @adminPanelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations console'**
+  String get adminPanelSubtitle;
+
+  /// No description provided for @adminConsoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin console'**
+  String get adminConsoleLabel;
+
+  /// No description provided for @adminRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator'**
+  String get adminRoleLabel;
+
+  /// No description provided for @myRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'My requests'**
+  String get myRequests;
+
+  /// No description provided for @myRequestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send requests to admin and track replies'**
+  String get myRequestsSubtitle;
+
+  /// No description provided for @newRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'New request'**
+  String get newRequest;
+
+  /// No description provided for @newRequestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a request to admin. You can attach one optional image.'**
+  String get newRequestSubtitle;
+
+  /// No description provided for @requestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get requestTitle;
+
+  /// No description provided for @requestDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get requestDescription;
+
+  /// No description provided for @addImageOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image (optional)'**
+  String get addImageOptional;
+
+  /// No description provided for @removeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove image'**
+  String get removeImage;
+
+  /// No description provided for @sendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get sendRequest;
+
+  /// No description provided for @requestSentToAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent to admin'**
+  String get requestSentToAdmin;
+
+  /// No description provided for @titleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get titleRequired;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Description is required'**
+  String get descriptionRequired;
+
+  /// No description provided for @searchYourRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Search your requests…'**
+  String get searchYourRequests;
+
+  /// No description provided for @searchRequestsAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, title, role…'**
+  String get searchRequestsAdmin;
+
+  /// No description provided for @allStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All statuses'**
+  String get allStatuses;
+
+  /// No description provided for @noRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests'**
+  String get noRequests;
+
+  /// No description provided for @noRequestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a request to ask admin for help.'**
+  String get noRequestsSubtitle;
+
+  /// No description provided for @noRequestsAdminSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests from customers, supervisors, and riders will appear here.'**
+  String get noRequestsAdminSubtitle;
+
+  /// No description provided for @adminActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin actions'**
+  String get adminActions;
+
+  /// No description provided for @markInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark in progress'**
+  String get markInProgress;
+
+  /// No description provided for @completeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get completeAction;
+
+  /// No description provided for @rejectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get rejectAction;
+
+  /// No description provided for @conversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation'**
+  String get conversation;
+
+  /// No description provided for @noRepliesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No replies yet. Start the conversation below.'**
+  String get noRepliesYet;
+
+  /// No description provided for @writeAReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a reply'**
+  String get writeAReply;
+
+  /// No description provided for @markedAsStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as {status}'**
+  String markedAsStatus(String status);
+
+  /// No description provided for @requestNoLongerAcceptsReplies.
+  ///
+  /// In en, this message translates to:
+  /// **'This request is {status} and no longer accepts replies.'**
+  String requestNoLongerAcceptsReplies(String status);
+
+  /// No description provided for @supportStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get supportStatusOpen;
+
+  /// No description provided for @supportStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get supportStatusInProgress;
+
+  /// No description provided for @supportStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get supportStatusCompleted;
+
+  /// No description provided for @supportStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get supportStatusRejected;
+
+  /// No description provided for @supportStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get supportStatusClosed;
+
+  /// No description provided for @pushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications'**
+  String get pushNotifications;
+
+  /// No description provided for @pushEnabledWithToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled · token {token}'**
+  String pushEnabledWithToken(String token);
+
+  /// No description provided for @pushDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled — tap to allow notifications'**
+  String get pushDisabledHint;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
+  /// No description provided for @notificationsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications enabled'**
+  String get notificationsEnabled;
+
+  /// No description provided for @couldNotEnableNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not enable notifications'**
+  String get couldNotEnableNotifications;
+
+  /// No description provided for @orderType.
+  ///
+  /// In en, this message translates to:
+  /// **'Order type'**
+  String get orderType;
+
+  /// No description provided for @orderTypeInstant.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant'**
+  String get orderTypeInstant;
+
+  /// No description provided for @orderTypeScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get orderTypeScheduled;
+
+  /// No description provided for @instantOrderOngoingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an ongoing instant order'**
+  String get instantOrderOngoingHint;
+
+  /// No description provided for @instantOrderStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start delivery as soon as possible'**
+  String get instantOrderStartHint;
+
+  /// No description provided for @scheduledOrderExistingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a scheduled order'**
+  String get scheduledOrderExistingHint;
+
+  /// No description provided for @scheduledOrderChooseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a later date and time'**
+  String get scheduledOrderChooseHint;
+
+  /// No description provided for @selectDateAndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date & time'**
+  String get selectDateAndTime;
+
+  /// No description provided for @scheduledForLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled for {when}'**
+  String scheduledForLabel(String when);
+
+  /// No description provided for @deliveryLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery location'**
+  String get deliveryLocation;
+
+  /// No description provided for @mySavedAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'My saved address'**
+  String get mySavedAddress;
+
+  /// No description provided for @noAddressOnProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'No address on profile'**
+  String get noAddressOnProfile;
+
+  /// No description provided for @noAddressOnYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'No address on your profile'**
+  String get noAddressOnYourProfile;
+
+  /// No description provided for @differentLocationForOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Different location for this order'**
+  String get differentLocationForOrder;
+
+  /// No description provided for @searchAndPinCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Search and pin a custom delivery point'**
+  String get searchAndPinCustom;
+
+  /// No description provided for @deliveringTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivering to'**
+  String get deliveringTo;
+
+  /// No description provided for @selectedCustomLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {address} (custom location)'**
+  String selectedCustomLocation(String address);
+
+  /// No description provided for @scheduledTimeMustBeFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled time must be in the future'**
+  String get scheduledTimeMustBeFuture;
+
+  /// No description provided for @deliveryAddressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery address is required'**
+  String get deliveryAddressRequired;
+
+  /// No description provided for @deliveryLocationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery location is required'**
+  String get deliveryLocationRequired;
+
+  /// No description provided for @selectABranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a branch'**
+  String get selectABranch;
+
+  /// No description provided for @selectScheduleDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a schedule date and time'**
+  String get selectScheduleDateTime;
+
+  /// No description provided for @alreadyHaveInstantOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an ongoing instant order'**
+  String get alreadyHaveInstantOrder;
+
+  /// No description provided for @alreadyHaveScheduledOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a scheduled order'**
+  String get alreadyHaveScheduledOrder;
+
+  /// No description provided for @orderProductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order {name}'**
+  String orderProductTitle(String name);
+
+  /// No description provided for @upcomingScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming scheduled'**
+  String get upcomingScheduled;
+
+  /// No description provided for @searchAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Search address'**
+  String get searchAddress;
+
+  /// No description provided for @searchAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Gulshan-e-Iqbal, Karachi'**
+  String get searchAddressHint;
+
+  /// No description provided for @searchAddressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Search an address, then fine-tune the pin on the map'**
+  String get searchAddressHelp;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @branch.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch'**
+  String get branch;
+
+  /// No description provided for @noActiveBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'No active branches available'**
+  String get noActiveBranches;
+
+  /// No description provided for @recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get recommended;
+
+  /// No description provided for @kmAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km away'**
+  String kmAway(String km);
+
+  /// No description provided for @tabRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get tabRequested;
+
+  /// No description provided for @tabScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get tabScheduled;
+
+  /// No description provided for @tabOthersWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Others ({count})'**
+  String tabOthersWithCount(int count);
+
+  /// No description provided for @noRequestedOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No requested orders'**
+  String get noRequestedOrders;
+
+  /// No description provided for @noRequestedOrdersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant and due scheduled orders appear here.'**
+  String get noRequestedOrdersSubtitle;
+
+  /// No description provided for @noScheduledOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No scheduled orders'**
+  String get noScheduledOrders;
+
+  /// No description provided for @noScheduledOrdersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders scheduled for later appear here until their time arrives.'**
+  String get noScheduledOrdersSubtitle;
+
+  /// No description provided for @waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get waiting;
+
+  /// No description provided for @qtyWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty {quantity}'**
+  String qtyWithValue(int quantity);
+
+  /// No description provided for @assignOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign order'**
+  String get assignOrder;
+
+  /// No description provided for @scheduledOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled order'**
+  String get scheduledOrderTitle;
+
+  /// No description provided for @customerWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer: {name}'**
+  String customerWithName(String name);
+
+  /// No description provided for @noteWithText.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: {note}'**
+  String noteWithText(String note);
+
+  /// No description provided for @scheduledAssignLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is scheduled. You can review details now, but assignment unlocks when the scheduled time arrives.'**
+  String get scheduledAssignLockedHint;
+
+  /// No description provided for @selectRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Select rider'**
+  String get selectRider;
+
+  /// No description provided for @myBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'My branch'**
+  String get myBranch;
+
+  /// No description provided for @otherBranches.
+  ///
+  /// In en, this message translates to:
+  /// **'Other branches'**
+  String get otherBranches;
+
+  /// No description provided for @noRidersInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'No riders in this group'**
+  String get noRidersInGroup;
+
+  /// No description provided for @estimatedArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated arrival'**
+  String get estimatedArrival;
+
+  /// No description provided for @assignAndNotifyRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign & notify rider'**
+  String get assignAndNotifyRider;
+
+  /// No description provided for @newlyAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Newly Assigned'**
+  String get newlyAssigned;
+
+  /// No description provided for @noAssignedOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No assigned orders'**
+  String get noAssignedOrders;
+
+  /// No description provided for @noAssignedOrdersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New deliveries from your supervisor will appear here.'**
+  String get noAssignedOrdersSubtitle;
+
+  /// No description provided for @startDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Start delivery'**
+  String get startDelivery;
+
+  /// No description provided for @markArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark arrived'**
+  String get markArrived;
+
+  /// No description provided for @viewAllActive.
+  ///
+  /// In en, this message translates to:
+  /// **'View all {count} active'**
+  String viewAllActive(int count);
+
+  /// No description provided for @noOrdersMatchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders match filters'**
+  String get noOrdersMatchFilters;
+
+  /// No description provided for @tryChangingSearchOrFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing search or filters.'**
+  String get tryChangingSearchOrFilters;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @customer.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer'**
+  String get customer;
+
+  /// No description provided for @qtyTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty / Total'**
+  String get qtyTotal;
+
+  /// No description provided for @placed.
+  ///
+  /// In en, this message translates to:
+  /// **'Placed'**
+  String get placed;
+
+  /// No description provided for @supervisorEta.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor ETA'**
+  String get supervisorEta;
+
+  /// No description provided for @supervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor'**
+  String get supervisor;
+
+  /// No description provided for @note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get note;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @statToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get statToday;
+
+  /// No description provided for @statNewAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'New assigned'**
+  String get statNewAssigned;
+
+  /// No description provided for @statNewRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'New requests'**
+  String get statNewRequests;
+
+  /// No description provided for @statInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get statInProgress;
+
+  /// No description provided for @statCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get statCompleted;
+
+  /// No description provided for @statFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get statFailed;
+
+  /// No description provided for @statPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statPending;
+
+  /// No description provided for @statTotalRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Total (range)'**
+  String get statTotalRange;
+
+  /// No description provided for @statRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get statRevenue;
+
+  /// No description provided for @vehicleWithPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle: {plate}'**
+  String vehicleWithPlate(String plate);
+
+  /// No description provided for @branchWithId.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch: {id}'**
+  String branchWithId(String id);
+
+  /// No description provided for @created.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get created;
+
+  /// No description provided for @timeSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Time spent'**
+  String get timeSpent;
+
+  /// No description provided for @supervisorNotified.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor notified'**
+  String get supervisorNotified;
+
+  /// No description provided for @rider.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider'**
+  String get rider;
+
+  /// No description provided for @eta.
+  ///
+  /// In en, this message translates to:
+  /// **'ETA'**
+  String get eta;
+
+  /// No description provided for @sendMessageToSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Send message to supervisor'**
+  String get sendMessageToSupervisor;
+
+  /// No description provided for @searchCustomerOrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Search customer or phone'**
+  String get searchCustomerOrPhone;
+
+  /// No description provided for @searchCustomerOrRider.
+  ///
+  /// In en, this message translates to:
+  /// **'Search customer or rider'**
+  String get searchCustomerOrRider;
+
+  /// No description provided for @orderDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Order details'**
+  String get orderDetails;
+
+  /// No description provided for @waitingCustomerConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for customer to confirm delivery.'**
+  String get waitingCustomerConfirm;
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// No description provided for @newOrdersWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new order(s) waiting'**
+  String newOrdersWaiting(int count);
+
+  /// No description provided for @openOrdersToAssignHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Orders → Requested to assign a rider'**
+  String get openOrdersToAssignHint;
 }
 
 class _AppLocalizationsDelegate

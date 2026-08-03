@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:l10n/l10n.dart';
 import 'package:models/models.dart';
 import 'package:provider/provider.dart';
 import 'package:repositories/repositories.dart';
@@ -69,6 +70,7 @@ class DriverOrderDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final controller = context.watch<DriverOrdersController>();
     final order = controller.orderById(orderId) ?? fallbackOrder;
     final messageRepo = context.read<OrderMessageRepository>();
@@ -88,13 +90,13 @@ class DriverOrderDetailsSheet extends StatelessWidget {
             child: Row(
               children: [
                 IconButton(
-                  tooltip: 'Back',
+                  tooltip: l10n.back,
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back),
                 ),
                 Expanded(
                   child: Text(
-                    'Order details',
+                    l10n.orderDetails,
                     style: context.texts.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -119,26 +121,26 @@ class DriverOrderDetailsSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  _InfoRow(label: 'Status', value: order.status.label),
-                  _InfoRow(label: 'Customer', value: order.customerName),
+                  _InfoRow(label: l10n.status, value: order.status.label),
+                  _InfoRow(label: l10n.customer, value: order.customerName),
                   _InfoRow(
-                    label: 'Qty / Total',
+                    label: l10n.qtyTotal,
                     value:
                         '${order.quantity} · Rs ${order.lineTotal.toStringAsFixed(0)} · ${order.paymentMethod.label}',
                   ),
                   _InfoRow(
-                    label: 'Placed',
+                    label: l10n.placed,
                     value: DateTimeFormatter.format(order.createdAt),
                   ),
                   if (order.estimatedArrivalAt != null)
                     _InfoRow(
-                      label: 'Supervisor ETA',
+                      label: l10n.supervisorEta,
                       value: DateTimeFormatter.format(order.estimatedArrivalAt),
                     ),
                   if (order.supervisorName != null)
-                    _InfoRow(label: 'Supervisor', value: order.supervisorName!),
+                    _InfoRow(label: l10n.supervisor, value: order.supervisorName!),
                   if (order.note != null && order.note!.isNotEmpty)
-                    _InfoRow(label: 'Note', value: order.note!),
+                    _InfoRow(label: l10n.note, value: order.note!),
                   const Divider(height: AppSpacing.xl),
                   DeliveryContactSection(order: order),
                   if (allowActions) ...[
@@ -155,7 +157,7 @@ class DriverOrderDetailsSheet extends StatelessWidget {
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.local_shipping_outlined),
-                        label: const Text('Start delivery'),
+                        label: Text(l10n.startDelivery),
                       )
                     else if (order.status == OrderStatus.outForDelivery)
                       FilledButton.icon(
@@ -169,11 +171,11 @@ class DriverOrderDetailsSheet extends StatelessWidget {
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.place_outlined),
-                        label: const Text('Mark arrived'),
+                        label: Text(l10n.markArrived),
                       )
                     else if (order.status == OrderStatus.riderArrived)
                       Text(
-                        'Waiting for customer to confirm delivery.',
+                        l10n.waitingCustomerConfirm,
                         style: context.texts.bodyMedium?.copyWith(
                           color: context.colors.onSurfaceVariant,
                         ),

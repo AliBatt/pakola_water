@@ -1,5 +1,6 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:l10n/l10n.dart';
 import 'package:models/models.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
@@ -48,6 +49,7 @@ class DriverOthersOrdersTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final controller = context.watch<DriverOrdersController>();
     final orders = controller.filteredOthersOrders;
 
@@ -64,7 +66,7 @@ class DriverOthersOrdersTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AppTextField(
-                labelText: 'Search customer or phone',
+                labelText: l10n.searchCustomerOrPhone,
                 prefix: const Icon(Icons.search),
                 onChanged: controller.setOthersSearch,
               ),
@@ -107,14 +109,14 @@ class DriverOthersOrdersTab extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<OrderStatus?>(
                 value: controller.othersStatusFilter,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
+                decoration: InputDecoration(
+                  labelText: l10n.status,
                   isDense: true,
                 ),
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
-                    child: Text('All statuses'),
+                    child: Text(l10n.allStatuses),
                   ),
                   ...OrderStatus.values
                       .where((s) => s.isCompleted)
@@ -140,9 +142,9 @@ class DriverOthersOrdersTab extends StatelessWidget {
                     children: [
                       SizedBox(
                         height: MediaQuery.sizeOf(context).height * 0.35,
-                        child: const EmptyStateView(
-                          title: 'No orders match filters',
-                          subtitle: 'Try changing search or filters.',
+                        child: EmptyStateView(
+                          title: l10n.noOrdersMatchFilters,
+                          subtitle: l10n.tryChangingSearchOrFilters,
                         ),
                       ),
                     ],

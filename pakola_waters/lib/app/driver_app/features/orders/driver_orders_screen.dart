@@ -8,6 +8,9 @@ import 'package:utilities/utilities.dart';
 import 'driver_order_details_sheet.dart';
 import 'driver_orders_controller.dart';
 import 'driver_others_orders_tab.dart';
+import '../../../../shared/requests/support_requests_app_bar_button.dart';
+import '../../routing/driver_routes.dart';
+import '../notifications/driver_notifications_bell_button.dart';
 
 class DriverOrdersScreen extends StatelessWidget {
   const DriverOrdersScreen({super.key});
@@ -25,17 +28,21 @@ class DriverOrdersScreen extends StatelessWidget {
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
+              leading: const SupportRequestsAppBarButton(
+                route: DriverRoutes.requests,
+              ),
               title: Text(l10n.navOrders),
               pinned: true,
               floating: true,
               forceElevated: innerBoxIsScrolled,
+              actions: const [DriverNotificationsBellButton()],
               bottom: TabBar(
                 tabs: [
                   Tab(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('Newly Assigned'),
+                        Text(l10n.newlyAssigned),
                         if (assigned.isNotEmpty) ...[
                           const SizedBox(width: 6),
                           Badge(label: Text('${assigned.length}')),
@@ -43,7 +50,7 @@ class DriverOrdersScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Tab(text: 'Others ($othersCount)'),
+                  Tab(text: l10n.tabOthersWithCount(othersCount)),
                 ],
               ),
             ),
@@ -65,6 +72,7 @@ class _AssignedOrdersTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final controller = context.watch<DriverOrdersController>();
     final assigned = controller.assignedOrders;
 
@@ -76,9 +84,9 @@ class _AssignedOrdersTab extends StatelessWidget {
           children: [
             SizedBox(
               height: MediaQuery.sizeOf(context).height * 0.5,
-              child: const EmptyStateView(
-                title: 'No assigned orders',
-                subtitle: 'New deliveries from your supervisor will appear here.',
+              child: EmptyStateView(
+                title: l10n.noAssignedOrders,
+                subtitle: l10n.noAssignedOrdersSubtitle,
               ),
             ),
           ],

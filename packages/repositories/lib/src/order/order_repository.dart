@@ -55,6 +55,10 @@ abstract class OrderRepository {
     String? reason,
   });
   Future<Result<bool>> hasActiveOrder(String customerId);
+  Future<Result<bool>> hasOpenOrderOfType({
+    required String customerId,
+    required OrderType orderType,
+  });
 }
 
 class OrderRepositoryImpl implements OrderRepository {
@@ -215,5 +219,16 @@ class OrderRepositoryImpl implements OrderRepository {
   @override
   Future<Result<bool>> hasActiveOrder(String customerId) {
     return _orderService.hasActiveOrder(customerId);
+  }
+
+  @override
+  Future<Result<bool>> hasOpenOrderOfType({
+    required String customerId,
+    required OrderType orderType,
+  }) {
+    return _orderService.hasOpenOrderOfType(
+      customerId: customerId,
+      orderType: orderType,
+    );
   }
 }

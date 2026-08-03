@@ -1,11 +1,13 @@
 import 'package:authentication/authentication.dart';
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:l10n/l10n.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_widgets/shared_widgets.dart';
 
 import '../../../../shared/push/app_push_controller.dart';
+import '../../routing/customer_routes.dart';
 import '../notifications/notifications_bell_button.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -104,17 +106,24 @@ class SettingsScreen extends StatelessWidget {
             const Divider(height: AppSpacing.xl),
           ],
           ListTile(
+            leading: const Icon(Icons.support_agent_outlined),
+            title: Text(l10n.myRequests),
+            subtitle: Text(l10n.myRequestsSubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(CustomerRoutes.requests),
+          ),
+          const Divider(height: AppSpacing.xl),
+          ListTile(
             leading: Icon(
               push.permissionGranted && push.isRegistered
                   ? Icons.notifications_active_outlined
                   : Icons.notifications_off_outlined,
             ),
-            title: const Text('Push notifications'),
+            title: Text(l10n.pushNotifications),
             subtitle: Text(
               push.isRegistered
-                  ? 'Enabled · token ${push.tokenPreview}'
-                  : (push.lastError ??
-                      'Disabled — tap to allow notifications'),
+                  ? l10n.pushEnabledWithToken(push.tokenPreview ?? '')
+                  : (push.lastError ?? l10n.pushDisabledHint),
             ),
             trailing: push.isRegistered
                 ? null
@@ -126,16 +135,16 @@ class SettingsScreen extends StatelessWidget {
                       if (!context.mounted) return;
                       final current = context.read<AppPushController>();
                       if (current.isRegistered) {
-                        AppSnackBar.success(context, 'Notifications enabled');
+                        AppSnackBar.success(context, l10n.notificationsEnabled);
                       } else {
                         AppSnackBar.warning(
                           context,
                           current.lastError ??
-                              'Could not enable notifications',
+                              l10n.couldNotEnableNotifications,
                         );
                       }
                     },
-                    child: const Text('Enable'),
+                    child: Text(l10n.enable),
                   ),
           ),
           const Divider(height: AppSpacing.xl),

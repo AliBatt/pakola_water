@@ -14,6 +14,7 @@ import '../features/payments/admin_payments_controller.dart';
 import '../features/products/products_controller.dart';
 import '../features/reports/admin_reports_controller.dart';
 import '../features/supervisors/supervisors_controller.dart';
+import '../../../shared/requests/support_requests_controller.dart';
 
 class AppProvidersResult {
   const AppProvidersResult({
@@ -48,6 +49,10 @@ class AppProviders {
       notificationService,
       userService,
     );
+    final supportRequestService = SupportRequestServiceImpl(
+      firestoreService,
+      notificationService,
+    );
 
     final authRepository = AuthRepositoryImpl(authService);
     final userRepository = UserRepositoryImpl(userService);
@@ -58,6 +63,8 @@ class AppProviders {
     final orderRepository = OrderRepositoryImpl(orderService);
     final orderMessageRepository =
         OrderMessageRepositoryImpl(orderMessageService);
+    final supportRequestRepository =
+        SupportRequestRepositoryImpl(supportRequestService);
 
     final authProvider = AuthProvider(
       authRepository: authRepository,
@@ -75,7 +82,23 @@ class AppProviders {
         Provider<NotificationRepository>.value(value: notificationRepository),
         Provider<OrderRepository>.value(value: orderRepository),
         Provider<OrderMessageRepository>.value(value: orderMessageRepository),
+        Provider<SupportRequestRepository>.value(
+          value: supportRequestRepository,
+        ),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+        ChangeNotifierProxyProvider<AuthProvider, SupportRequestsController>(
+          create: (_) => SupportRequestsController(
+            requestRepository: supportRequestRepository,
+          ),
+          update: (context, auth, previous) {
+            final controller = previous ??
+                SupportRequestsController(
+                  requestRepository: supportRequestRepository,
+                );
+            controller.bindUser(auth.user);
+            return controller;
+          },
+        ),
         ChangeNotifierProvider(
           create: (_) => SupervisorsController(
             userRepository: userRepository,
