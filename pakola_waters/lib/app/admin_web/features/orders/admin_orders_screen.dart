@@ -6,6 +6,7 @@ import 'package:shared_widgets/shared_widgets.dart';
 import 'package:utilities/utilities.dart';
 
 import '../../../../shared/orders/others_date_preset.dart';
+import 'admin_create_manual_order_dialog.dart';
 import 'admin_order_details_dialog.dart';
 import 'admin_orders_controller.dart';
 
@@ -100,6 +101,12 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 tooltip: 'Refresh',
                 onPressed: controller.refresh,
                 icon: const Icon(Icons.refresh),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              FilledButton.icon(
+                onPressed: () => showAdminCreateManualOrderDialog(context),
+                icon: const Icon(Icons.add),
+                label: const Text('Manual order'),
               ),
             ],
           ),

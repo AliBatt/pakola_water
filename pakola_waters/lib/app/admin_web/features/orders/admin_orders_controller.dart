@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:repositories/repositories.dart';
+import 'package:utilities/utilities.dart';
 
 import '../../../../shared/orders/others_date_preset.dart';
 
@@ -12,16 +13,26 @@ class AdminOrdersController extends ChangeNotifier {
     required OrderRepository orderRepository,
     required BranchRepository branchRepository,
     required UserRepository userRepository,
+    required ProductRepository productRepository,
+    required NotificationRepository notificationRepository,
   })  : _orderRepository = orderRepository,
         _branchRepository = branchRepository,
-        _userRepository = userRepository;
+        _userRepository = userRepository,
+        _productRepository = productRepository,
+        _notificationRepository = notificationRepository;
 
   final OrderRepository _orderRepository;
   final BranchRepository _branchRepository;
   final UserRepository _userRepository;
+  final ProductRepository _productRepository;
+  final NotificationRepository _notificationRepository;
 
   List<DeliveryOrder> _orders = [];
   List<Branch> _branches = [];
+  List<AppUser> _customers = [];
+  List<AppUser> _supervisors = [];
+  List<AppUser> _riders = [];
+  List<Product> _products = [];
   Map<String, String> _supervisorNames = {};
   String _search = '';
   OthersDatePreset _datePreset = OthersDatePreset.all;
@@ -35,6 +46,15 @@ class AdminOrdersController extends ChangeNotifier {
 
   List<DeliveryOrder> get orders => _orders;
   List<Branch> get branches => _branches;
+  List<AppUser> get customers => _customers;
+  List<AppUser> get supervisors => _supervisors
+      .where((u) => u.status == UserStatus.active)
+      .toList();
+  List<AppUser> get riders =>
+      _riders.where((u) => u.status == UserStatus.active).toList();
+  List<Product> get products => _products
+      .where((p) => p.status == ProductStatus.active)
+      .toList();
   String get search => _search;
   OthersDatePreset get datePreset => _datePreset;
   DateTimeRange? get customRange => _customRange;
@@ -106,8 +126,7 @@ class AdminOrdersController extends ChangeNotifier {
       _orders = orders;
       notifyListeners();
     });
-    _loadBranches();
-    _loadSupervisors();
+    _loadLookups();
   }
 
   Future<void> refresh() async {
@@ -116,7 +135,17 @@ class AdminOrdersController extends ChangeNotifier {
       _orders = orders;
       notifyListeners();
     });
-    await Future.wait([_loadBranches(), _loadSupervisors()]);
+    await _loadLookups();
+  }
+
+  Future<void> _loadLookups() async {
+    await Future.wait([
+      _loadBranches(),
+      _loadSupervisors(),
+      _loadCustomers(),
+      _loadRiders(),
+      _loadProducts(),
+    ]);
   }
 
   Future<void> _loadBranches() async {
@@ -130,11 +159,179 @@ class AdminOrdersController extends ChangeNotifier {
   Future<void> _loadSupervisors() async {
     final result = await _userRepository.listByRole(AppRole.supervisor);
     if (result case Success<List<AppUser>>(:final value)) {
+      _supervisors = value;
       _supervisorNames = {
         for (final user in value) user.id: user.displayName,
       };
       notifyListeners();
     }
+  }
+
+  Future<void> _loadCustomers() async {
+    final result = await _userRepository.listByRole(AppRole.customer);
+    if (result case Success<List<AppUser>>(:final value)) {
+      _customers = value
+        ..sort((a, b) => a.displayName.compareTo(b.displayName));
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadRiders() async {
+    final result = await _userRepository.listByRole(AppRole.driver);
+    if (result case Success<List<AppUser>>(:final value)) {
+      _riders = value;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadProducts() async {
+    final result = await _productRepository.listProducts();
+    if (result case Success<List<Product>>(:final value)) {
+      _products = value
+        ..sort((a, b) => a.name.compareTo(b.name));
+      notifyListeners();
+    }
+  }
+
+  List<AppUser> supervisorsForBranch(String? branchId) {
+    final list = supervisors;
+    if (branchId == null || branchId.isEmpty) return list;
+    return list.where((user) {
+      return user.primaryBranchId == branchId ||
+          user.branchIds.contains(branchId);
+    }).toList();
+  }
+
+  List<AppUser> ridersForBranch(String? branchId) {
+    final list = riders;
+    if (branchId == null || branchId.isEmpty) return list;
+    return list.where((user) {
+      return user.primaryBranchId == branchId ||
+          user.branchIds.contains(branchId);
+    }).toList();
+  }
+
+  Branch? branchById(String? id) {
+    if (id == null) return null;
+    for (final branch in _branches) {
+      if (branch.id == id) return branch;
+    }
+    return null;
+  }
+
+  Future<Result<DeliveryOrder>> createManualOrder({
+    required AppUser admin,
+    required AppUser customer,
+    required Product product,
+    required Branch branch,
+    required AppUser supervisor,
+    required AppUser rider,
+    required int quantity,
+    required PaymentMethod paymentMethod,
+    required DateTime estimatedArrivalAt,
+    String? note,
+    String? deliveryAddress,
+  }) async {
+    if (quantity < 1) {
+      return const FailureResult(ServerFailure('Quantity must be at least 1'));
+    }
+    if (estimatedArrivalAt.isBefore(DateTime.now())) {
+      return const FailureResult(
+        ServerFailure('ETA must be in the future'),
+      );
+    }
+
+    _isActing = true;
+    _error = null;
+    notifyListeners();
+
+    final unitPrice = product.effectivePrice;
+    final order = DeliveryOrder(
+      id: '',
+      customerId: customer.id,
+      customerName: customer.displayName,
+      customerPhone: customer.phone,
+      branchId: branch.id,
+      branchName: branch.name,
+      productId: product.id,
+      productName: product.name,
+      quantity: quantity,
+      unitPrice: unitPrice,
+      lineTotal: unitPrice * quantity,
+      note: note?.trim().isEmpty == true ? null : note?.trim(),
+      paymentMethod: paymentMethod,
+      status: OrderStatus.assigned,
+      deliveryAddress: (deliveryAddress ?? customer.address)?.trim().isEmpty ==
+              true
+          ? null
+          : (deliveryAddress ?? customer.address)?.trim(),
+      deliveryLocation: customer.location,
+      adminNotes: 'Manual order created by ${admin.displayName}',
+      adminActionById: admin.id,
+      adminActionByName: admin.displayName,
+    );
+
+    final result = await _orderRepository.createManualOrder(
+      order: order,
+      createdByAdminId: admin.id,
+      supervisorId: supervisor.id,
+      supervisorName: supervisor.displayName,
+      riderId: rider.id,
+      riderName: rider.displayName,
+      estimatedArrivalAt: estimatedArrivalAt,
+    );
+
+    if (result case Success<DeliveryOrder>(:final value)) {
+      final etaLabel = DateTimeFormatter.formatDateTime(estimatedArrivalAt);
+      await _notificationRepository.createNotification(
+        AppNotification(
+          id: '',
+          userId: rider.id,
+          title: 'New delivery assigned',
+          body:
+              '${product.name} x$quantity for ${customer.displayName}. ETA $etaLabel (manual order)',
+          createdById: admin.id,
+          createdByRole: admin.role.name,
+          createdByName: admin.displayName,
+          type: 'order_assigned',
+          orderId: value.id,
+        ),
+      );
+      await _notificationRepository.createNotification(
+        AppNotification(
+          id: '',
+          userId: supervisor.id,
+          title: 'Manual order created',
+          body:
+              '${product.name} x$quantity for ${customer.displayName} assigned to ${rider.displayName}',
+          createdById: admin.id,
+          createdByRole: admin.role.name,
+          createdByName: admin.displayName,
+          type: 'order_assigned',
+          orderId: value.id,
+        ),
+      );
+      await _notificationRepository.createNotification(
+        AppNotification(
+          id: '',
+          userId: customer.id,
+          title: 'Order created',
+          body:
+              'Your order for ${product.name} x$quantity was placed by admin. Rider: ${rider.displayName}. ETA $etaLabel',
+          createdById: admin.id,
+          createdByRole: admin.role.name,
+          createdByName: admin.displayName,
+          type: 'order_assigned',
+          orderId: value.id,
+        ),
+      );
+    } else if (result case FailureResult<DeliveryOrder>(:final failure)) {
+      _error = failure.message;
+    }
+
+    _isActing = false;
+    notifyListeners();
+    return result;
   }
 
   void setSearch(String value) {
@@ -221,6 +418,45 @@ class AdminOrdersController extends ChangeNotifier {
       orderId: order.id,
       adminNotes: adminNotes,
     );
+  }
+
+  Future<Result<void>> cancelOrder({
+    required DeliveryOrder order,
+    required AppUser admin,
+    required String reason,
+    String? adminNotes,
+  }) async {
+    if (!order.status.isActive) {
+      return const FailureResult(ServerFailure('Order is already closed'));
+    }
+
+    _isActing = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _orderRepository.cancelOrder(
+      orderId: order.id,
+      cancelledById: admin.id,
+      cancelledByName: admin.displayName,
+      cancelledByRole: admin.role.name,
+      reason: reason.trim().isEmpty ? 'Cancelled by admin' : reason.trim(),
+    );
+
+    if (result case Success()) {
+      final notes = adminNotes?.trim();
+      if (notes != null && notes.isNotEmpty) {
+        await _orderRepository.adminUpdateNotes(
+          orderId: order.id,
+          adminNotes: notes,
+        );
+      }
+    } else if (result case FailureResult(:final failure)) {
+      _error = failure.message;
+    }
+
+    _isActing = false;
+    notifyListeners();
+    return result;
   }
 
   DateTimeRange? _dateRange() {

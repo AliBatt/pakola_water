@@ -5,6 +5,15 @@ import 'package:models/models.dart';
 
 abstract class OrderService {
   Future<Result<DeliveryOrder>> createOrder(DeliveryOrder order);
+  Future<Result<DeliveryOrder>> createManualOrder({
+    required DeliveryOrder order,
+    required String createdByAdminId,
+    required String supervisorId,
+    required String supervisorName,
+    required String riderId,
+    required String riderName,
+    required DateTime estimatedArrivalAt,
+  });
   Stream<List<DeliveryOrder>> watchCustomerOrders(String customerId);
   Stream<DeliveryOrder?> watchActiveOrder(String customerId);
   Stream<List<DeliveryOrder>> watchBranchOrders(String branchId);
@@ -39,6 +48,13 @@ abstract class OrderService {
   Future<Result<void>> markOutForDelivery(String orderId);
   Future<Result<void>> markRiderArrived(String orderId);
   Future<Result<void>> markPaymentPaid(String orderId);
+  Future<Result<void>> cancelOrder({
+    required String orderId,
+    required String cancelledById,
+    required String cancelledByName,
+    required String cancelledByRole,
+    String? reason,
+  });
   Future<Result<bool>> hasActiveOrder(String customerId);
 }
 
@@ -100,6 +116,52 @@ class OrderServiceImpl implements OrderService {
 
       await docRef.set(data);
       return Success(order.copyWith(id: docRef.id));
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<DeliveryOrder>> createManualOrder({
+    required DeliveryOrder order,
+    required String createdByAdminId,
+    required String supervisorId,
+    required String supervisorName,
+    required String riderId,
+    required String riderName,
+    required DateTime estimatedArrivalAt,
+  }) async {
+    try {
+      final docRef =
+          _firestoreService.collection(CollectionPaths.orders).doc();
+      final data = order.toJson()
+        ..['createdAt'] = FieldValue.serverTimestamp()
+        ..['updatedAt'] = FieldValue.serverTimestamp()
+        ..['status'] = OrderStatus.assigned.name
+        ..['paymentStatus'] = PaymentStatus.pending.name
+        ..['createdBy'] = createdByAdminId
+        ..['createdByRole'] = AppRole.admin.name
+        ..['manualOrder'] = true
+        ..['supervisorId'] = supervisorId
+        ..['supervisorName'] = supervisorName
+        ..['riderId'] = riderId
+        ..['riderName'] = riderName
+        ..['supervisorNotifiedAt'] = FieldValue.serverTimestamp()
+        ..['assignedAt'] = FieldValue.serverTimestamp()
+        ..['estimatedArrivalAt'] = Timestamp.fromDate(estimatedArrivalAt);
+
+      await docRef.set(data);
+      return Success(
+        order.copyWith(
+          id: docRef.id,
+          status: OrderStatus.assigned,
+          supervisorId: supervisorId,
+          supervisorName: supervisorName,
+          riderId: riderId,
+          riderName: riderName,
+          estimatedArrivalAt: estimatedArrivalAt.toIso8601String(),
+        ),
+      );
     } catch (error) {
       return FailureResult(ServerFailure(error.toString()));
     }
@@ -428,11 +490,88 @@ class OrderServiceImpl implements OrderService {
         return const FailureResult(ServerFailure('Order not found'));
       }
 
+      final status = OrderStatus.fromString(
+        snapshot.data()?['status'] as String? ?? '',
+      );
+      if (status == OrderStatus.cancelled || status == OrderStatus.failed) {
+        return const FailureResult(
+          ServerFailure('Cannot mark cancelled/failed orders as paid'),
+        );
+      }
+
       await _firestoreService.updateDoc(
         CollectionPaths.orders,
         orderId,
         {
           'paymentStatus': PaymentStatus.paid.name,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      return const Success(null);
+    } catch (error) {
+      return FailureResult(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> cancelOrder({
+    required String orderId,
+    required String cancelledById,
+    required String cancelledByName,
+    required String cancelledByRole,
+    String? reason,
+  }) async {
+    try {
+      final snapshot =
+          await _firestoreService.doc(CollectionPaths.orders, orderId).get();
+      if (!snapshot.exists) {
+        return const FailureResult(ServerFailure('Order not found'));
+      }
+
+      final data = snapshot.data() ?? {};
+      final status = OrderStatus.fromString(data['status'] as String? ?? '');
+      if (!status.isActive) {
+        return const FailureResult(
+          ServerFailure('Order is already closed'),
+        );
+      }
+
+      final isCustomer = cancelledByRole == AppRole.customer.name;
+      if (isCustomer) {
+        if (!status.canCustomerCancel) {
+          return const FailureResult(
+            ServerFailure(
+              'You can no longer cancel once the rider has arrived',
+            ),
+          );
+        }
+        if (data['customerId'] != cancelledById) {
+          return const FailureResult(
+            ServerFailure('You can only cancel your own order'),
+          );
+        }
+      }
+
+      final trimmedReason = reason?.trim();
+      final defaultReason = isCustomer
+          ? 'Cancelled by customer'
+          : 'Cancelled by $cancelledByRole';
+
+      await _firestoreService.updateDoc(
+        CollectionPaths.orders,
+        orderId,
+        {
+          'status': OrderStatus.cancelled.name,
+          // Cancelled orders remain unpaid.
+          'paymentStatus': PaymentStatus.pending.name,
+          'cancelledAt': FieldValue.serverTimestamp(),
+          'cancelledById': cancelledById,
+          'cancelledByName': cancelledByName,
+          'cancelledByRole': cancelledByRole,
+          'failureReason':
+              (trimmedReason == null || trimmedReason.isEmpty)
+                  ? defaultReason
+                  : trimmedReason,
           'updatedAt': FieldValue.serverTimestamp(),
         },
       );

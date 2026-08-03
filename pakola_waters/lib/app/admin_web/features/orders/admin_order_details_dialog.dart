@@ -118,6 +118,37 @@ class _AdminOrderDetailsDialogState extends State<AdminOrderDetailsDialog> {
     }
   }
 
+  Future<void> _cancelOrder() async {
+    final admin = context.read<AuthProvider>().user;
+    if (admin == null) return;
+
+    final result = await _promptNotes(
+      title: 'Cancel order',
+      subtitle:
+          'This marks the order cancelled and unpaid. Rider and supervisor will be notified.',
+      requireReason: true,
+    );
+    if (result == null || !mounted) return;
+
+    final parts = result.split('\n---\n');
+    final reason = parts.first;
+    final notes = parts.length > 1 ? parts[1] : '';
+
+    final action = await context.read<AdminOrdersController>().cancelOrder(
+          order: order,
+          admin: admin,
+          reason: reason,
+          adminNotes: notes.isEmpty ? null : notes,
+        );
+    if (!mounted) return;
+    switch (action) {
+      case Success():
+        AppSnackBar.success(context, 'Order cancelled');
+      case FailureResult(:final failure):
+        AppSnackBar.error(context, failure.message);
+    }
+  }
+
   Future<String?> _promptNotes({
     required String title,
     required String subtitle,
@@ -320,7 +351,6 @@ class _AdminOrderDetailsDialogState extends State<AdminOrderDetailsDialog> {
     final controller = context.watch<AdminOrdersController>();
     final current = order;
     final canAct = current.status.isActive;
-    final location = current.deliveryLocation;
 
     return Dialog(
       child: ConstrainedBox(
@@ -378,17 +408,15 @@ class _AdminOrderDetailsDialogState extends State<AdminOrderDetailsDialog> {
                             'Qty / Total',
                             '${current.quantity} · Rs ${current.lineTotal.toStringAsFixed(0)} · ${current.paymentMethod.label}',
                           ),
-                          _InfoRow(
-                            'Address',
-                            current.deliveryAddress ?? '—',
-                          ),
-                          if (location != null)
-                            _InfoRow(
-                              'Coordinates',
-                              '${location.latitude.toStringAsFixed(6)}, ${location.longitude.toStringAsFixed(6)}',
-                            ),
                           if (current.note != null && current.note!.isNotEmpty)
                             _InfoRow('Customer note', current.note!),
+                          const SizedBox(height: AppSpacing.md),
+                          _SectionTitle('Delivery location'),
+                          DeliveryContactSection(
+                            order: current,
+                            showPhone: false,
+                            showTitle: false,
+                          ),
                           const SizedBox(height: AppSpacing.md),
                           _SectionTitle('People'),
                           _InfoRow(
@@ -554,9 +582,22 @@ class _AdminOrderDetailsDialogState extends State<AdminOrderDetailsDialog> {
                             const SizedBox(height: AppSpacing.sm),
                             OutlinedButton.icon(
                               onPressed:
-                                  controller.isActing ? null : _markFailed,
+                                  controller.isActing ? null : _cancelOrder,
                               icon: Icon(
                                 Icons.cancel_outlined,
+                                color: context.colors.error,
+                              ),
+                              label: Text(
+                                'Cancel order',
+                                style: TextStyle(color: context.colors.error),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            OutlinedButton.icon(
+                              onPressed:
+                                  controller.isActing ? null : _markFailed,
+                              icon: Icon(
+                                Icons.error_outline,
                                 color: context.colors.error,
                               ),
                               label: Text(

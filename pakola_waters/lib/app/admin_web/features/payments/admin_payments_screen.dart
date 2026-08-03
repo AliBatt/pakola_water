@@ -538,6 +538,17 @@ class _PaymentActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (order.blocksPaymentActions) {
+      return Text(
+        order.status == OrderStatus.cancelled
+            ? 'Cancelled · Unpaid'
+            : '${order.status.label} · no payment action',
+        style: context.texts.bodySmall?.copyWith(
+          color: context.colors.onSurfaceVariant,
+        ),
+      );
+    }
+
     if (!order.isUnpaidCredit) {
       return Text(
         order.effectivePaymentStatus.label,

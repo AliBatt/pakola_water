@@ -4,6 +4,15 @@ import 'package:services/services.dart';
 
 abstract class OrderRepository {
   Future<Result<DeliveryOrder>> createOrder(DeliveryOrder order);
+  Future<Result<DeliveryOrder>> createManualOrder({
+    required DeliveryOrder order,
+    required String createdByAdminId,
+    required String supervisorId,
+    required String supervisorName,
+    required String riderId,
+    required String riderName,
+    required DateTime estimatedArrivalAt,
+  });
   Stream<List<DeliveryOrder>> watchCustomerOrders(String customerId);
   Stream<DeliveryOrder?> watchActiveOrder(String customerId);
   Stream<List<DeliveryOrder>> watchBranchOrders(String branchId);
@@ -38,6 +47,13 @@ abstract class OrderRepository {
   Future<Result<void>> markOutForDelivery(String orderId);
   Future<Result<void>> markRiderArrived(String orderId);
   Future<Result<void>> markPaymentPaid(String orderId);
+  Future<Result<void>> cancelOrder({
+    required String orderId,
+    required String cancelledById,
+    required String cancelledByName,
+    required String cancelledByRole,
+    String? reason,
+  });
   Future<Result<bool>> hasActiveOrder(String customerId);
 }
 
@@ -49,6 +65,27 @@ class OrderRepositoryImpl implements OrderRepository {
   @override
   Future<Result<DeliveryOrder>> createOrder(DeliveryOrder order) {
     return _orderService.createOrder(order);
+  }
+
+  @override
+  Future<Result<DeliveryOrder>> createManualOrder({
+    required DeliveryOrder order,
+    required String createdByAdminId,
+    required String supervisorId,
+    required String supervisorName,
+    required String riderId,
+    required String riderName,
+    required DateTime estimatedArrivalAt,
+  }) {
+    return _orderService.createManualOrder(
+      order: order,
+      createdByAdminId: createdByAdminId,
+      supervisorId: supervisorId,
+      supervisorName: supervisorName,
+      riderId: riderId,
+      riderName: riderName,
+      estimatedArrivalAt: estimatedArrivalAt,
+    );
   }
 
   @override
@@ -156,6 +193,23 @@ class OrderRepositoryImpl implements OrderRepository {
   @override
   Future<Result<void>> markPaymentPaid(String orderId) {
     return _orderService.markPaymentPaid(orderId);
+  }
+
+  @override
+  Future<Result<void>> cancelOrder({
+    required String orderId,
+    required String cancelledById,
+    required String cancelledByName,
+    required String cancelledByRole,
+    String? reason,
+  }) {
+    return _orderService.cancelOrder(
+      orderId: orderId,
+      cancelledById: cancelledById,
+      cancelledByName: cancelledByName,
+      cancelledByRole: cancelledByRole,
+      reason: reason,
+    );
   }
 
   @override

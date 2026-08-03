@@ -6,7 +6,7 @@ import 'package:utilities/utilities.dart';
 
 import 'app_snackbar.dart';
 import 'app_text_field.dart';
-import 'order_timestamp_formatter.dart';
+import 'delivery_order_details_sheet.dart';
 
 Future<void> showOrderDetailsSheet({
   required BuildContext context,
@@ -18,6 +18,8 @@ Future<void> showOrderDetailsSheet({
   Future<Result<void>> Function(String message, OrderMessageType type)? onSendMessage,
   bool allowStaffMessage = false,
   Future<Result<void>> Function(String message)? onStaffMessage,
+  bool allowCancel = false,
+  Future<Result<void>> Function(String? reason)? onCancel,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -33,6 +35,8 @@ Future<void> showOrderDetailsSheet({
       onSendMessage: onSendMessage,
       allowStaffMessage: allowStaffMessage,
       onStaffMessage: onStaffMessage,
+      allowCancel: allowCancel,
+      onCancel: onCancel,
     ),
   );
 }
@@ -48,6 +52,8 @@ class OrderDetailsSheet extends StatefulWidget {
     this.onSendMessage,
     this.allowStaffMessage = false,
     this.onStaffMessage,
+    this.allowCancel = false,
+    this.onCancel,
   });
 
   final DeliveryOrder order;
@@ -59,6 +65,8 @@ class OrderDetailsSheet extends StatefulWidget {
       onSendMessage;
   final bool allowStaffMessage;
   final Future<Result<void>> Function(String message)? onStaffMessage;
+  final bool allowCancel;
+  final Future<Result<void>> Function(String? reason)? onCancel;
 
   @override
   State<OrderDetailsSheet> createState() => _OrderDetailsSheetState();
@@ -67,11 +75,66 @@ class OrderDetailsSheet extends StatefulWidget {
 class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
   final _messageController = TextEditingController();
   bool _sending = false;
+  bool _cancelling = false;
 
   @override
   void dispose() {
     _messageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cancelOrder() async {
+    final onCancel = widget.onCancel;
+    if (onCancel == null) return;
+
+    final reasonController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel order?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'You can cancel until the rider arrives. This order will be marked cancelled and unpaid.',
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: reasonController,
+              labelText: 'Reason (optional)',
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep order'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    final reason = reasonController.text.trim();
+    reasonController.dispose();
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _cancelling = true);
+    final result = await onCancel(reason.isEmpty ? null : reason);
+    if (!mounted) return;
+    setState(() => _cancelling = false);
+
+    switch (result) {
+      case Success():
+        Navigator.pop(context);
+        AppSnackBar.success(context, 'Order cancelled');
+      case FailureResult(:final failure):
+        AppSnackBar.error(context, failure.message);
+    }
   }
 
   Future<void> _send(OrderMessageType type) async {
@@ -188,6 +251,15 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     value:
                         'Rs ${order.lineTotal.toStringAsFixed(0)} · ${order.paymentMethod.label}',
                   ),
+                  if (order.status == OrderStatus.cancelled) ...[
+                    _InfoRow(
+                      label: 'Payment',
+                      value: 'Cancelled · Unpaid',
+                    ),
+                    if (order.failureReason != null &&
+                        order.failureReason!.isNotEmpty)
+                      _InfoRow(label: 'Cancel reason', value: order.failureReason!),
+                  ],
                   _InfoRow(
                     label: 'Placed',
                     value: widget.formatTs(order.createdAt),
@@ -202,8 +274,25 @@ class _OrderDetailsSheetState extends State<OrderDetailsSheet> {
                     _InfoRow(label: 'Rider', value: order.riderName!),
                   if (order.note != null && order.note!.isNotEmpty)
                     _InfoRow(label: 'Note', value: order.note!),
-                  if (order.deliveryAddress != null)
-                    _InfoRow(label: 'Address', value: order.deliveryAddress!),
+                  const Divider(height: AppSpacing.xl),
+                  DeliveryContactSection(
+                    order: order,
+                    showPhone: false,
+                  ),
+                  if (widget.allowCancel && widget.onCancel != null) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    OutlinedButton.icon(
+                      onPressed: (_cancelling || _sending) ? null : _cancelOrder,
+                      icon: Icon(
+                        Icons.cancel_outlined,
+                        color: context.colors.error,
+                      ),
+                      label: Text(
+                        _cancelling ? 'Cancelling…' : 'Cancel order',
+                        style: TextStyle(color: context.colors.error),
+                      ),
+                    ),
+                  ],
                   const Divider(height: AppSpacing.xl),
                   Text(
                     'Messages',

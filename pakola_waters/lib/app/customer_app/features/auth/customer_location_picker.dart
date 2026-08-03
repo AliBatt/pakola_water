@@ -4,10 +4,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:models/models.dart';
+import 'package:shared_widgets/shared_widgets.dart';
 
 /// Map pin + "Use current location" for customer delivery address.
-/// Address text is reverse-filled via [onAddressResolved] when GPS is used;
-/// manual typing of address is not supported — only map/GPS.
 class CustomerLocationPicker extends StatefulWidget {
   const CustomerLocationPicker({
     super.key,
@@ -33,6 +32,7 @@ class _CustomerLocationPickerState extends State<CustomerLocationPicker> {
   late LatLng _position;
   final MapController _mapController = MapController();
   bool _locating = false;
+  bool _resolvingAddress = false;
   String? _locationError;
 
   @override
@@ -51,14 +51,29 @@ class _CustomerLocationPickerState extends State<CustomerLocationPicker> {
     super.dispose();
   }
 
-  void _updatePosition(LatLng value, {String? address}) {
+  Future<void> _updatePosition(LatLng value) async {
     setState(() => _position = value);
     widget.onChanged(
       GeoLocation(latitude: value.latitude, longitude: value.longitude),
     );
-    if (address != null) {
-      widget.onAddressResolved?.call(address);
-    }
+    await _resolveAddress(
+      GeoLocation(latitude: value.latitude, longitude: value.longitude),
+    );
+  }
+
+  Future<void> _resolveAddress(GeoLocation location) async {
+    setState(() => _resolvingAddress = true);
+    final address = await reverseGeocode(
+      location,
+      userAgent: 'PakolaWatersCustomer/1.0 (signup-location)',
+    );
+    if (!mounted) return;
+    setState(() => _resolvingAddress = false);
+    widget.onAddressResolved?.call(
+      address ??
+          'Lat ${location.latitude.toStringAsFixed(5)}, '
+              'Lng ${location.longitude.toStringAsFixed(5)}',
+    );
   }
 
   Future<void> _useCurrentLocation() async {
@@ -98,12 +113,7 @@ class _CustomerLocationPickerState extends State<CustomerLocationPicker> {
       if (!mounted) return;
 
       final point = LatLng(position.latitude, position.longitude);
-      _updatePosition(
-        point,
-        address:
-            'Lat ${position.latitude.toStringAsFixed(5)}, '
-            'Lng ${position.longitude.toStringAsFixed(5)}',
-      );
+      await _updatePosition(point);
       _mapController.move(point, 16);
       setState(() => _locating = false);
     } catch (_) {
@@ -126,8 +136,7 @@ class _CustomerLocationPickerState extends State<CustomerLocationPicker> {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Use your current location, then fine-tune the pin on the map. '
-          'Address cannot be typed manually.',
+          'Use your current location, then fine-tune the pin on the map.',
           style: context.texts.bodySmall?.copyWith(
             color: context.colors.onSurfaceVariant,
           ),
@@ -163,12 +172,7 @@ class _CustomerLocationPickerState extends State<CustomerLocationPicker> {
               options: MapOptions(
                 initialCenter: _position,
                 initialZoom: 14,
-                onTap: (tapPosition, point) => _updatePosition(
-                  point,
-                  address:
-                      'Lat ${point.latitude.toStringAsFixed(5)}, '
-                      'Lng ${point.longitude.toStringAsFixed(5)}',
-                ),
+                onTap: (tapPosition, point) => _updatePosition(point),
               ),
               children: [
                 TileLayer(
@@ -195,8 +199,10 @@ class _CustomerLocationPickerState extends State<CustomerLocationPicker> {
         ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Lat: ${_position.latitude.toStringAsFixed(5)}, '
-          'Lng: ${_position.longitude.toStringAsFixed(5)}',
+          _resolvingAddress
+              ? 'Resolving address…'
+              : 'Lat: ${_position.latitude.toStringAsFixed(5)}, '
+                  'Lng: ${_position.longitude.toStringAsFixed(5)}',
           style: context.texts.bodySmall,
         ),
       ],

@@ -91,14 +91,21 @@ class OrdersController extends ChangeNotifier {
     required Product product,
     required int quantity,
     required PaymentMethod paymentMethod,
+    required String branchId,
+    required String deliveryAddress,
+    required GeoLocation deliveryLocation,
+    bool isCustomDeliveryLocation = false,
     String? note,
   }) async {
     final user = _user;
     if (user == null) {
       return const FailureResult(AuthFailure('Not signed in'));
     }
-    if (user.primaryBranchId == null || user.primaryBranchId!.isEmpty) {
-      return const FailureResult(ServerFailure('No branch selected on profile'));
+    if (branchId.isEmpty) {
+      return const FailureResult(ServerFailure('Select a branch'));
+    }
+    if (deliveryAddress.trim().isEmpty) {
+      return const FailureResult(ServerFailure('Delivery address is required'));
     }
     if (quantity < 1) {
       return const FailureResult(ServerFailure('Quantity must be at least 1'));
@@ -109,13 +116,13 @@ class OrdersController extends ChangeNotifier {
     notifyListeners();
 
     final unitPrice = product.effectivePrice;
-    final branch = branchFor(user.primaryBranchId!);
+    final branch = branchFor(branchId);
     final order = DeliveryOrder(
       id: '',
       customerId: user.id,
       customerName: user.displayName,
       customerPhone: user.phone,
-      branchId: user.primaryBranchId!,
+      branchId: branchId,
       branchName: branch?.name,
       productId: product.id,
       productName: product.name,
@@ -125,8 +132,9 @@ class OrdersController extends ChangeNotifier {
       note: note?.trim().isEmpty == true ? null : note?.trim(),
       paymentMethod: paymentMethod,
       status: OrderStatus.pending,
-      deliveryAddress: user.address,
-      deliveryLocation: user.location,
+      deliveryAddress: deliveryAddress.trim(),
+      deliveryLocation: deliveryLocation,
+      isCustomDeliveryLocation: isCustomDeliveryLocation,
     );
 
     final result = await _orderRepository.createOrder(order);
@@ -141,6 +149,45 @@ class OrdersController extends ChangeNotifier {
 
   Future<Result<void>> confirmDelivery(String orderId) {
     return _orderRepository.confirmDelivery(orderId);
+  }
+
+  Future<Result<void>> cancelOrder({
+    required DeliveryOrder order,
+    String? reason,
+  }) async {
+    final user = _user;
+    if (user == null) {
+      return const FailureResult(AuthFailure('Not signed in'));
+    }
+    if (!order.status.canCustomerCancel) {
+      return const FailureResult(
+        ServerFailure(
+          'You can no longer cancel once the rider has arrived',
+        ),
+      );
+    }
+
+    _isSubmitting = true;
+    _error = null;
+    notifyListeners();
+
+    final result = await _orderRepository.cancelOrder(
+      orderId: order.id,
+      cancelledById: user.id,
+      cancelledByName: user.displayName,
+      cancelledByRole: user.role.name,
+      reason: reason?.trim().isEmpty == true
+          ? 'Cancelled by customer'
+          : reason?.trim(),
+    );
+
+    if (result case FailureResult(:final failure)) {
+      _error = failure.message;
+    }
+
+    _isSubmitting = false;
+    notifyListeners();
+    return result;
   }
 
   Stream<List<OrderMessage>> watchOrderMessages(String orderId) {

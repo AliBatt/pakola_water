@@ -59,5 +59,10 @@
 	<string>Pakola Waters needs your location to set your delivery address and recommend the nearest branch.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Pakola Waters needs your location to set your delivery address and recommend the nearest branch.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>googlechromes</string>
+	</array>
 </dict>
 </plist>

@@ -6,6 +6,8 @@ export 'src/delivery_order_details_sheet.dart';
 export 'src/details_dialog.dart';
 export 'src/empty_state_view.dart';
 export 'src/error_view.dart';
+export 'src/geo/map_launcher.dart';
+export 'src/geo/reverse_geocode.dart';
 export 'src/loading_view.dart';
 export 'src/order_details_sheet.dart';
 export 'src/order_timestamp_formatter.dart';

@@ -129,46 +129,58 @@ class SupervisorHomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.md,
-              children: [
-                _StatCard(
-                  label: 'Today',
-                  value: '${controller.todayOrderCount}',
-                  icon: Icons.today,
-                ),
-                _StatCard(
-                  label: 'New requests',
-                  value: '${controller.newOrderCount}',
-                  icon: Icons.inbox,
-                ),
-                _StatCard(
-                  label: 'Total (range)',
-                  value: '${controller.statsTotalOrders}',
-                  icon: Icons.receipt_long,
-                ),
-                _StatCard(
-                  label: 'Revenue',
-                  value: 'Rs ${controller.statsRevenue.toStringAsFixed(0)}',
-                  icon: Icons.payments_outlined,
-                ),
-                _StatCard(
-                  label: 'Pending',
-                  value: '${controller.statsPendingOrders}',
-                  icon: Icons.hourglass_top,
-                ),
-                _StatCard(
-                  label: 'In progress',
-                  value: '${controller.statsInProgressOrders}',
-                  icon: Icons.local_shipping_outlined,
-                ),
-                _StatCard(
-                  label: 'Completed',
-                  value: '${controller.statsCompletedOrders}',
-                  icon: Icons.check_circle_outline,
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final gap = AppSpacing.md;
+                final cardWidth = (constraints.maxWidth - gap) / 2;
+                final cards = [
+                  _StatCard(
+                    label: 'Today',
+                    value: '${controller.todayOrderCount}',
+                    icon: Icons.today,
+                  ),
+                  _StatCard(
+                    label: 'New requests',
+                    value: '${controller.newOrderCount}',
+                    icon: Icons.inbox,
+                  ),
+                  _StatCard(
+                    label: 'Total (range)',
+                    value: '${controller.statsTotalOrders}',
+                    icon: Icons.receipt_long,
+                  ),
+                  _StatCard(
+                    label: 'Revenue',
+                    value:
+                        'Rs ${controller.statsRevenue.toStringAsFixed(0)}',
+                    icon: Icons.payments_outlined,
+                  ),
+                  _StatCard(
+                    label: 'Pending',
+                    value: '${controller.statsPendingOrders}',
+                    icon: Icons.hourglass_top,
+                  ),
+                  _StatCard(
+                    label: 'In progress',
+                    value: '${controller.statsInProgressOrders}',
+                    icon: Icons.local_shipping_outlined,
+                  ),
+                  _StatCard(
+                    label: 'Completed',
+                    value: '${controller.statsCompletedOrders}',
+                    icon: Icons.check_circle_outline,
+                  ),
+                ];
+
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: gap,
+                  children: [
+                    for (final card in cards)
+                      SizedBox(width: cardWidth, child: card),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -190,30 +202,31 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 160,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: context.colors.primary),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                value,
-                style: context.texts.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: context.colors.primary),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.texts.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
               ),
-              Text(
-                label,
-                style: context.texts.bodySmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                ),
+            ),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.texts.bodySmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

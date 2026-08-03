@@ -223,19 +223,50 @@ exports.onOrderWritten = onDocumentUpdated(
         beforeStatus !== afterStatus
       ) {
         const isFailed = afterStatus === "failed";
-        const title = isFailed ? "Order failed" : "Order cancelled";
-        const reason = after.failureReason ?
-            ` Reason: ${after.failureReason}` :
-            "";
-        const body =
-            `${productName} x${qty} for ${customerName} was ${afterStatus}.${reason}`;
-        const type = isFailed ? "order_failed" : "order_cancelled";
-        const actorId = after.adminActionById || "system";
-        const actorName = after.adminActionByName || "Admin";
+        const isCancelled = afterStatus === "cancelled";
+        const reasonText = after.failureReason || after.cancellationReason || "";
+        const reason = reasonText ? ` Reason: ${reasonText}` : "";
 
-        const recipients = new Set(
-            [supervisorId, riderId, customerId].filter(Boolean),
-        );
+        const cancelledByRole = after.cancelledByRole || "";
+        const cancelledByName =
+            after.cancelledByName || after.adminActionByName || "Admin";
+        const cancelledById =
+            after.cancelledById || after.adminActionById || "system";
+
+        let title;
+        let body;
+        let actorRole = "admin";
+        if (isFailed) {
+          title = "Order failed";
+          body =
+              `${productName} x${qty} for ${customerName} was failed.${reason}`;
+          actorRole = "admin";
+        } else if (cancelledByRole === "customer") {
+          title = "Order cancelled by customer";
+          body =
+              `${customerName} cancelled ${productName} x${qty}.${reason}`;
+          actorRole = "customer";
+        } else if (cancelledByRole === "admin") {
+          title = "Order cancelled by admin";
+          body =
+              `Admin (${cancelledByName}) cancelled ${productName} x${qty} for ${customerName}.${reason}`;
+          actorRole = "admin";
+        } else {
+          title = "Order cancelled";
+          body =
+              `${productName} x${qty} for ${customerName} was cancelled.${reason}`;
+          actorRole = cancelledByRole || "admin";
+        }
+
+        const type = isFailed ? "order_failed" : "order_cancelled";
+
+        // Always notify assigned rider + supervisor.
+        // Notify customer only when admin/staff cancelled (not self-cancel).
+        const recipients = new Set([supervisorId, riderId].filter(Boolean));
+        if (isFailed || (isCancelled && cancelledByRole !== "customer")) {
+          if (customerId) recipients.add(customerId);
+        }
+
         for (const userId of recipients) {
           await createNotification({
             userId,
@@ -243,9 +274,9 @@ exports.onOrderWritten = onDocumentUpdated(
             body,
             type,
             orderId,
-            createdById: actorId,
-            createdByRole: "admin",
-            createdByName: actorName,
+            createdById: cancelledById,
+            createdByRole: actorRole,
+            createdByName: cancelledByName,
           });
         }
         return;

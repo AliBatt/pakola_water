@@ -104,6 +104,8 @@ class AppProviders {
             orderRepository: orderRepository,
             branchRepository: branchRepository,
             userRepository: userRepository,
+            productRepository: productRepository,
+            notificationRepository: notificationRepository,
           ),
         ),
         ChangeNotifierProvider(

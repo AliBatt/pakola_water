@@ -39,6 +39,7 @@ class DeliveryOrder {
     this.updatedAt,
     this.deliveryAddress,
     this.deliveryLocation,
+    this.isCustomDeliveryLocation = false,
   });
 
   factory DeliveryOrder.fromJson(Map<String, dynamic> json) {
@@ -85,6 +86,8 @@ class DeliveryOrder {
               json['deliveryLocation'] as Map<String, dynamic>,
             )
           : null,
+      isCustomDeliveryLocation:
+          json['isCustomDeliveryLocation'] as bool? ?? false,
     );
   }
 
@@ -122,9 +125,32 @@ class DeliveryOrder {
   final String? updatedAt;
   final String? deliveryAddress;
   final GeoLocation? deliveryLocation;
+  final bool isCustomDeliveryLocation;
+
+  /// Address shown in UI, with "(custom location)" when order-specific.
+  String get deliveryAddressLabel {
+    final address = deliveryAddress?.trim();
+    if (address == null || address.isEmpty) {
+      return isCustomDeliveryLocation ? '(custom location)' : '—';
+    }
+    if (isCustomDeliveryLocation) {
+      return '$address (custom location)';
+    }
+    return address;
+  }
 
   bool get isUnpaidCredit =>
-      paymentMethod == PaymentMethod.credit && paymentStatus.isUnpaid;
+      paymentMethod == PaymentMethod.credit &&
+      paymentStatus.isUnpaid &&
+      status != OrderStatus.cancelled &&
+      status != OrderStatus.failed;
+
+  /// Cancelled / failed orders stay unpaid and are not actionable in payments.
+  bool get isCancelledUnpaid =>
+      status == OrderStatus.cancelled && paymentStatus.isUnpaid;
+
+  bool get blocksPaymentActions =>
+      status == OrderStatus.cancelled || status == OrderStatus.failed;
 
   /// COD is collected on delivery; credit stays pending until marked paid.
   PaymentStatus get effectivePaymentStatus {
@@ -205,6 +231,7 @@ class DeliveryOrder {
         'adminActionById': adminActionById,
         'adminActionByName': adminActionByName,
         'deliveryAddress': deliveryAddress,
+        'isCustomDeliveryLocation': isCustomDeliveryLocation,
         if (deliveryLocation != null)
           'deliveryLocation': deliveryLocation!.toJson(),
       };
@@ -266,6 +293,7 @@ class DeliveryOrder {
       updatedAt: updatedAt ?? this.updatedAt,
       deliveryAddress: deliveryAddress,
       deliveryLocation: deliveryLocation,
+      isCustomDeliveryLocation: isCustomDeliveryLocation,
     );
   }
 

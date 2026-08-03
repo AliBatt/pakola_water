@@ -281,7 +281,9 @@ class AdminReportsExporter {
       order.effectivePaymentStatus.label,
       controller.supervisorNameFor(order),
       controller.riderNameFor(order),
-      order.deliveryAddress ?? '',
+      order.deliveryAddressLabel == '—'
+          ? ''
+          : order.deliveryAddressLabel,
       DateTimeFormatter.formatLong(order.assignedAt),
       DateTimeFormatter.formatLong(order.outForDeliveryAt),
       DateTimeFormatter.formatLong(order.riderArrivedAt),

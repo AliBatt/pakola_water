@@ -5,6 +5,8 @@ import 'package:models/models.dart';
 import 'package:utilities/utilities.dart';
 
 import 'app_snackbar.dart';
+import 'geo/map_launcher.dart';
+import 'geo/reverse_geocode.dart';
 import 'order_timestamp_formatter.dart';
 
 export 'order_timestamp_formatter.dart';
@@ -141,10 +143,88 @@ class DeliveryOrderDetailsSheet extends StatelessWidget {
   }
 }
 
-class DeliveryContactSection extends StatelessWidget {
-  const DeliveryContactSection({super.key, required this.order});
+class DeliveryContactSection extends StatefulWidget {
+  const DeliveryContactSection({
+    super.key,
+    required this.order,
+    this.showPhone = true,
+    this.showTitle = true,
+  });
 
   final DeliveryOrder order;
+  final bool showPhone;
+  final bool showTitle;
+
+  @override
+  State<DeliveryContactSection> createState() => _DeliveryContactSectionState();
+}
+
+class _DeliveryContactSectionState extends State<DeliveryContactSection> {
+  String? _resolvedAddress;
+  bool _resolvingAddress = false;
+  bool _openingMaps = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _maybeResolveAddress();
+  }
+
+  @override
+  void didUpdateWidget(covariant DeliveryContactSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldLoc = oldWidget.order.deliveryLocation;
+    final newLoc = widget.order.deliveryLocation;
+    final locationChanged = oldLoc?.latitude != newLoc?.latitude ||
+        oldLoc?.longitude != newLoc?.longitude;
+    final addressChanged =
+        oldWidget.order.deliveryAddress != widget.order.deliveryAddress;
+    if (locationChanged || addressChanged) {
+      _resolvedAddress = null;
+      _maybeResolveAddress();
+    }
+  }
+
+  Future<void> _maybeResolveAddress() async {
+    final order = widget.order;
+    final location = order.deliveryLocation;
+    if (location == null) return;
+    if (!isCoordinateOnlyAddress(order.deliveryAddress)) return;
+
+    setState(() => _resolvingAddress = true);
+    final resolved = await reverseGeocode(
+      location,
+      userAgent: 'PakolaWaters/1.0 (order-delivery-contact)',
+    );
+    if (!mounted) return;
+    setState(() {
+      _resolvingAddress = false;
+      _resolvedAddress = resolved;
+    });
+  }
+
+  String get _addressDisplay {
+    final order = widget.order;
+    final resolved = _resolvedAddress?.trim();
+    final stored = order.deliveryAddress?.trim();
+    final base = (resolved != null && resolved.isNotEmpty)
+        ? resolved
+        : (stored != null &&
+                stored.isNotEmpty &&
+                !isCoordinateOnlyAddress(stored)
+            ? stored
+            : (stored != null && stored.isNotEmpty ? stored : null));
+
+    if (base == null || base.isEmpty) {
+      if (_resolvingAddress) return 'Resolving address…';
+      return order.isCustomDeliveryLocation ? '(custom location)' : '—';
+    }
+    if (order.isCustomDeliveryLocation &&
+        !base.toLowerCase().contains('custom location')) {
+      return '$base (custom location)';
+    }
+    return base;
+  }
 
   Future<void> _copy(BuildContext context, String label, String value) async {
     await Clipboard.setData(ClipboardData(text: value));
@@ -153,32 +233,55 @@ class DeliveryContactSection extends StatelessWidget {
     }
   }
 
+  Future<void> _openMaps() async {
+    final location = widget.order.deliveryLocation;
+    if (location == null) return;
+
+    setState(() => _openingMaps = true);
+    final opened = await openInGoogleMaps(
+      location,
+      label: _addressDisplay == '—' ? null : _addressDisplay,
+    );
+    if (!mounted) return;
+    setState(() => _openingMaps = false);
+    if (!opened) {
+      AppSnackBar.error(context, 'Could not open Google Maps');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final order = widget.order;
     final location = order.deliveryLocation;
+    final address = _addressDisplay;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Delivery contact',
-          style: context.texts.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+        if (widget.showTitle) ...[
+          Text(
+            'Delivery contact',
+            style: context.texts.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        if (order.customerPhone != null && order.customerPhone!.isNotEmpty)
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        if (widget.showPhone &&
+            order.customerPhone != null &&
+            order.customerPhone!.isNotEmpty)
           _CopyableRow(
             label: 'Phone',
             value: order.customerPhone!,
             onCopy: () => _copy(context, 'Phone', order.customerPhone!),
           ),
-        if (order.deliveryAddress != null && order.deliveryAddress!.isNotEmpty)
-          _CopyableRow(
-            label: 'Address',
-            value: order.deliveryAddress!,
-            onCopy: () => _copy(context, 'Address', order.deliveryAddress!),
-          ),
+        _CopyableRow(
+          label: 'Address',
+          value: address,
+          onCopy: address == '—' || address == 'Resolving address…'
+              ? null
+              : () => _copy(context, 'Address', address),
+        ),
         if (location != null) ...[
           _CopyableRow(
             label: 'Latitude',
@@ -191,6 +294,20 @@ class DeliveryContactSection extends StatelessWidget {
             value: location.longitude.toString(),
             onCopy: () =>
                 _copy(context, 'Longitude', location.longitude.toString()),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          FilledButton.icon(
+            onPressed: _openingMaps ? null : _openMaps,
+            icon: _openingMaps
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.map_outlined),
+            label: Text(
+              _openingMaps ? 'Opening Maps…' : 'Open in Google Maps',
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           OutlinedButton.icon(
@@ -248,12 +365,12 @@ class _CopyableRow extends StatelessWidget {
   const _CopyableRow({
     required this.label,
     required this.value,
-    required this.onCopy,
+    this.onCopy,
   });
 
   final String label;
   final String value;
-  final VoidCallback onCopy;
+  final VoidCallback? onCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -279,11 +396,12 @@ class _CopyableRow extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            tooltip: 'Copy $label',
-            onPressed: onCopy,
-            icon: const Icon(Icons.copy_outlined),
-          ),
+          if (onCopy != null)
+            IconButton(
+              tooltip: 'Copy $label',
+              onPressed: onCopy,
+              icon: const Icon(Icons.copy_outlined),
+            ),
         ],
       ),
     );

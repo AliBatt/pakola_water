@@ -13,9 +13,11 @@ dependencies:
     path: ../design_system
   flutter:
     sdk: flutter
+  http: ^1.4.0
   intl_phone_field: ^3.2.0
   models:
     path: ../models
+  url_launcher: ^6.3.1
   utilities:
     path: ../utilities
 

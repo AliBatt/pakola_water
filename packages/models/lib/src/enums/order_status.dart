@@ -33,6 +33,13 @@ enum OrderStatus {
       this == OrderStatus.outForDelivery ||
       this == OrderStatus.riderArrived;
 
+  /// Customer may cancel until the rider marks arrived.
+  bool get canCustomerCancel =>
+      this == OrderStatus.pending ||
+      this == OrderStatus.supervisorNotified ||
+      this == OrderStatus.assigned ||
+      this == OrderStatus.outForDelivery;
+
   String get label {
     switch (this) {
       case OrderStatus.pending:

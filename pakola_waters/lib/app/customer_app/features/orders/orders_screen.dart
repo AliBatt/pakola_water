@@ -20,10 +20,14 @@ class OrdersScreen extends StatelessWidget {
     showOrderDetailsSheet(
       context: context,
       order: order,
-      
       messagesStream: controller.watchOrderMessages(order.id),
       allowCustomerMessage: order.status.isActive,
       allowReview: order.status == OrderStatus.delivered,
+      allowCancel: order.status.canCustomerCancel,
+      onCancel: (reason) => controller.cancelOrder(
+        order: order,
+        reason: reason,
+      ),
       onSendMessage: (message, type) async {
         final result = await controller.sendOrderMessage(
           order: order,
